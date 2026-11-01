@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,6 +14,7 @@ import { useTheme } from '@/theme';
 import { espace } from '@/theme/tokens';
 
 const POUR_REFERENT = ['a_traiter', 'orientation'];
+const DUREE_ALERTE_MS = 6000;
 
 function ActiverAlertes() {
   const { etat, actualiser } = useEtatAlertes();
@@ -66,6 +67,13 @@ export default function Notifications() {
       return () => setVues([]);
     }, [lire])
   );
+
+  // Une alerte vue s'efface d'elle-même au bout de quelques secondes.
+  useEffect(() => {
+    if (vues.length === 0) return;
+    const minuterie = setTimeout(() => setVues([]), DUREE_ALERTE_MS);
+    return () => clearTimeout(minuterie);
+  }, [vues]);
 
   const ouvrir = (n: Notification) => {
     setVues((avant) => avant.filter((a) => a.id !== n.id));
