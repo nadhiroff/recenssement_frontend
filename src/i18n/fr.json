@@ -1,0 +1,119 @@
+{
+  "commun": {
+    "continuer": "Continuer", "retour": "Retour", "envoyer": "Envoyer", "annuler": "Annuler",
+    "modifier": "Modifier", "oui": "Oui", "non": "Non", "fermer": "Fermer", "reessayer": "Réessayer",
+    "enregistrer": "Enregistrer", "chargement": "Chargement…", "aucunResultat": "Aucun résultat"
+  },
+  "app": { "nom": "Recensement ZOCLI", "famille": "Famille ZOCLI de Sahouè Doutou" },
+  "accueil": {
+    "titre": "Notre lignée, ensemble",
+    "texte": "Inscrivez-vous en quelques minutes et indiquez vos parents. Les référents de chaque branche vérifient les liens avant qu'ils n'entrent dans l'arbre de la famille.",
+    "commencer": "Commencer",
+    "grandTexte": "Grand texte"
+  },
+  "connexion": {
+    "titre": "Connexion",
+    "texte": "Votre numéro WhatsApp sert d'identifiant.",
+    "telephone": "Numéro WhatsApp",
+    "email": "Adresse email",
+    "emailAide": "Première connexion : votre code vous sera envoyé à cette adresse.",
+    "recevoir": "Recevoir mon code",
+    "codeTitre": "Saisissez votre code",
+    "codeTexte": "Un code à 6 chiffres vient d'être envoyé. Il expire dans 10 minutes.",
+    "codeTexteEmail": "Regardez votre boîte email : un code à 6 chiffres vient d'être envoyé. Il expire dans 10 minutes.",
+    "renvoyer": "Renvoyer le code",
+    "renvoyerDans": "Renvoyer dans {s} s",
+    "verifier": "Vérifier"
+  },
+  "consentement": {
+    "titre": "Vos données",
+    "texte": "La famille ZOCLI recueille vos noms, votre année de naissance, votre lieu de résidence, votre numéro WhatsApp et vos liens de parenté pour reconstituer l'arbre de la collectivité. Votre numéro reste visible des seuls référents de votre branche et de l'administrateur. Vous pouvez corriger ou retirer votre fiche à tout moment depuis l'application.",
+    "accepter": "J'ai lu et j'accepte que ces informations soient enregistrées.",
+    "tiers": "Je confirme avoir le droit de déclarer cette personne et j'accepte que ces informations soient enregistrées.",
+    "obligatoire": "Votre accord est nécessaire pour continuer."
+  },
+  "inscription": {
+    "titre": "Mon inscription",
+    "titreTiers": "Inscrire un proche",
+    "etape": "Étape {n} sur {total}",
+    "etapes": { "type": "Qui inscrivez-vous ?", "identite": "Identité", "branche": "Branche", "pere": "Père", "mere": "Mère", "verification": "Vérification" },
+    "nomFamille": "Nom de famille",
+    "prenoms": "Prénoms",
+    "autresNoms": "Autres noms",
+    "ajouterNom": "Ajouter un nom (vodoun, baptême, surnom)",
+    "typeNom": { "vodoun": "Vodoun", "bapteme": "Baptême", "surnom": "Surnom" },
+    "sexe": "Sexe",
+    "sexes": { "M": "Homme", "F": "Femme", "I": "Non précisé" },
+    "anneeNaissance": "Année de naissance",
+    "anneeAide": "Même approximative. Laissez vide si vous ne savez pas.",
+    "precision": "Précision",
+    "precisions": { "exacte": "Exacte", "environ": "Environ", "decennie": "Décennie", "inconnue": "Inconnue" },
+    "lieu": "Lieu de résidence",
+    "brancheAide": "Choisissez la branche de votre lignée.",
+    "brancheObligatoire": "Choisissez une branche.",
+    "parentTexte": { "pere": "Qui est le père ?", "mere": "Qui est la mère ?" },
+    "parentNom": { "pere": "Nom du père de cette personne (si connu)", "mere": "Nom du père de cette personne (si connu)" },
+    "decede": "Cette personne est décédée",
+    "recherche": "Recherche de fiches existantes…",
+    "horsLigneRecherche": "Hors ligne : les fiches ressemblantes vous seront proposées au retour du réseau.",
+    "propositions": "Ces fiches vous ressemblent-elles ?",
+    "cestLui": "C'est lui",
+    "cestElle": "C'est elle",
+    "pasLui": "Ce n'est pas lui/elle, créer une nouvelle fiche",
+    "ficheReservee": "Une fiche existe mais elle est réservée aux référents. Créez une nouvelle fiche, un référent fera le lien.",
+    "nouvelleFiche": "Nouvelle fiche",
+    "ficheChoisie": "Fiche choisie : {nom}",
+    "changer": "Changer",
+    "jeNeSaisPas": "Je ne sais pas",
+    "inconnu": "Non renseigné",
+    "epousesPere": "Épouses enregistrées du père",
+    "autreMere": "Ma mère n'est pas dans cette liste",
+    "parentObligatoire": "Choisissez une fiche, créez-en une ou indiquez « Je ne sais pas ».",
+    "recapitulatif": "Récapitulatif",
+    "envoyer": "Envoyer mon inscription",
+    "enFile": "Pas de réseau : votre inscription partira toute seule au retour du réseau.",
+    "resoudreTitre": "Des fiches ressemblantes existent",
+    "resoudreTexte": "Vérifiez avant de créer une nouvelle fiche.",
+    "merci": "Merci, votre inscription est enregistrée.",
+    "brouillonRepris": "Votre brouillon a été repris."
+  },
+  "tiers": {
+    "types": { "enfant_mineur": "Mon enfant mineur", "parent_decede": "Mon parent décédé", "aine": "Un aîné de ma branche", "autre": "Une autre personne" },
+    "present": "La personne est présente avec moi",
+    "presentObligatoire": "L'aîné doit être présent lors de la saisie.",
+    "typeObligatoire": "Choisissez qui vous inscrivez."
+  },
+  "horsLigne": {
+    "bandeau": "Hors ligne — vos données seront envoyées au retour du réseau",
+    "enAttente": "{n} envoi(s) en attente",
+    "envoye": "Envoi terminé."
+  },
+  "onglets": { "arbre": "Arbre", "liens": "Mes liens", "notifications": "Alertes", "fiche": "Ma fiche", "referent": "Référent", "suivi": "Suivi" },
+  "fiche": {
+    "titre": "Ma fiche",
+    "corriger": "Corriger ma fiche",
+    "inscrireProche": "Inscrire un proche",
+    "retirer": "Retirer ma fiche",
+    "retirerTexte": "Votre fiche sera masquée et votre compte désactivé. Cette action se fait en lien avec l'administrateur si vous souhaitez revenir. Continuer ?",
+    "deconnexion": "Se déconnecter",
+    "enregistre": "Fiche mise à jour."
+  },
+  "statuts": { "declare": "Déclaré", "confirme": "Confirmé", "valide": "Validé", "en_examen": "En examen", "prive": "Privé", "rejete": "Rejeté" },
+  "roles": { "pere": "Père", "mere": "Mère" },
+  "erreurs": {
+    "reseau": "Connexion impossible. Vérifiez votre réseau.",
+    "serveur": "Le serveur a rencontré un problème. Réessayez.",
+    "requis": "Ce champ est obligatoire.",
+    "annee": "Saisissez une année à 4 chiffres, ou laissez vide.",
+    "telephone": "Numéro invalide : indiquez l'indicatif, par exemple +229.",
+    "email": "Adresse email invalide.",
+    "code": "Saisissez les 6 chiffres du code."
+  },
+  "audio": {
+    "inscription.etapes.identite": "Indiquez vos noms et votre année de naissance.",
+    "inscription.etapes.branche": "Choisissez votre branche.",
+    "inscription.etapes.pere": "Indiquez le nom de votre père.",
+    "inscription.etapes.mere": "Indiquez le nom de votre mère.",
+    "inscription.etapes.verification": "Vérifiez vos réponses, puis envoyez."
+  }
+}
