@@ -77,7 +77,7 @@ export function SessionFournie({ children }: { children: ReactNode }) {
     queryKey: ['moi'],
     queryFn: () => api<Moi>('GET', '/me'),
     enabled: connecte,
-    staleTime: 60_000,
+    staleTime: 0,
   });
 
   const valeur = useMemo<Session>(
@@ -85,7 +85,8 @@ export function SessionFournie({ children }: { children: ReactNode }) {
       pret,
       connecte,
       moi: requete.data,
-      chargementMoi: connecte && requete.isPending && requete.fetchStatus !== 'paused',
+      // Un cache « sans fiche » peut être périmé : on attend le serveur avant d'orienter vers l'inscription.
+      chargementMoi: connecte && !requete.data?.personne && requete.fetchStatus === 'fetching',
       ouvrir: async (jeton) => {
         await ecrireJeton(jeton);
         setConnecte(true);
@@ -93,7 +94,7 @@ export function SessionFournie({ children }: { children: ReactNode }) {
       fermer,
       recharger: requete.refetch,
     }),
-    [pret, connecte, requete.data, requete.isPending, requete.fetchStatus, fermer, requete.refetch]
+    [pret, connecte, requete.data, requete.fetchStatus, fermer, requete.refetch]
   );
   return <Contexte.Provider value={valeur}>{children}</Contexte.Provider>;
 }

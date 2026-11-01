@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 
 import { Parcours } from '@/features/inscription/Parcours';
-import { brouillonVide, construireCorps, lireBrouillon } from '@/features/inscription/modele';
+import { brouillonVide, construireCorps, ecrireBrouillon, lireBrouillon } from '@/features/inscription/modele';
 import { ErreurApi } from '@/lib/api';
 import * as apiModule from '@/lib/api';
 import { lireFile } from '@/lib/file';
@@ -124,6 +124,16 @@ describe('parcours d\'inscription', () => {
     expect(file[0].client_uuid).toBe(b.client_uuid);
     expect(router.replace).not.toHaveBeenCalled();
     expect((await lireBrouillon('soi'))?.identite.prenoms).toBe('Afi');
+  });
+});
+
+describe('lireBrouillon', () => {
+  it('reprend un brouillon encore incomplet avec son consentement et son uuid', async () => {
+    const b = { ...brouillonVide(), consentement: true };
+    await ecrireBrouillon('soi', b);
+    const lu = await lireBrouillon('soi');
+    expect(lu?.consentement).toBe(true);
+    expect(lu?.client_uuid).toBe(b.client_uuid);
   });
 });
 

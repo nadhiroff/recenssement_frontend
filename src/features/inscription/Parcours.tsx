@@ -127,7 +127,7 @@ function Formulaire({ parcours, initial }: { parcours: TypeParcours; initial: Br
     setErreur(undefined);
     const chemin = parcours === 'tiers' ? '/inscriptions/tiers' : '/inscriptions';
     await ecrireBrouillon(parcours, b);
-    await ajouterEnvoi({ client_uuid: b.client_uuid, chemin, corps: construireCorps(b, parcours), cree_le: Date.now() });
+    await ajouterEnvoi({ client_uuid: b.client_uuid, chemin, corps: construireCorps(b, parcours) });
     const issues = await synchroniser();
     setOccupe(false);
     const issue = issues.find((i) => i.envoi.client_uuid === b.client_uuid);

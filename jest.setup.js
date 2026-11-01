@@ -4,7 +4,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 );
 jest.mock('@react-native-community/netinfo', () => ({
   __esModule: true,
-  default: { addEventListener: jest.fn(() => jest.fn()) },
+  default: { configure: jest.fn(), addEventListener: jest.fn(() => jest.fn()) },
 }));
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(async () => 'jeton-test'),

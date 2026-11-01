@@ -272,7 +272,7 @@ export function useRebond() {
   const style = useAnimatedStyle(() => ({ transform: [{ scale: echelle.value }] }));
   const rebondir = () => {
     if (!reduit) {
-      echelle.value = withSequence(withTiming(1.04, { duration: 110 }), withTiming(1, { duration: 130 }));
+      echelle.set(withSequence(withTiming(1.04, { duration: 110 }), withTiming(1, { duration: 130 })));
     }
   };
   return { style, rebondir };

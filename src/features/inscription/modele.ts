@@ -95,11 +95,18 @@ export const brouillonVide = (): Brouillon => ({
 
 const cleBrouillon = (p: Parcours) => `brouillon.${p}`;
 
+/** Un brouillon est incomplet par nature : la validation se fait étape par étape, pas à la relecture. */
 export async function lireBrouillon(p: Parcours): Promise<Brouillon | null> {
   const brut = await AsyncStorage.getItem(cleBrouillon(p));
   if (!brut) return null;
-  const lu = brouillonSchema.safeParse(JSON.parse(brut));
-  return lu.success ? lu.data : null;
+  try {
+    const lu = JSON.parse(brut) as Partial<Brouillon>;
+    if (typeof lu.client_uuid !== 'string') return null;
+    const vide = brouillonVide();
+    return { ...vide, ...lu, identite: { ...vide.identite, ...lu.identite } };
+  } catch {
+    return null;
+  }
 }
 
 export const ecrireBrouillon = (p: Parcours, b: Brouillon) =>

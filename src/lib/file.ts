@@ -37,9 +37,9 @@ export function abonnerFile(f: (file: Envoi[]) => void) {
   };
 }
 
-export async function ajouterEnvoi(envoi: Envoi) {
+export async function ajouterEnvoi(envoi: Omit<Envoi, 'cree_le'>) {
   const file = await lireFile();
-  await ecrire([...file.filter((e) => e.client_uuid !== envoi.client_uuid), envoi]);
+  await ecrire([...file.filter((e) => e.client_uuid !== envoi.client_uuid), { ...envoi, cree_le: Date.now() }]);
 }
 
 /**
