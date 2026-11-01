@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router, useNavigation, usePreventRemove } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm, useFormState } from 'react-hook-form';
+import { StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { z } from 'zod';
 
 import { Ecran } from '@/components/Ecran';
@@ -13,6 +15,9 @@ import { t } from '@/i18n';
 import { api } from '@/lib/api';
 import { useSession } from '@/lib/auth';
 import { vibrerSucces } from '@/lib/retour';
+
+const LARGEUR_BORD = 32;
+const SEUIL_GLISSEMENT = 30;
 
 const schema = z.object({ identite: identiteSchema });
 type Formulaire = z.infer<typeof schema>;
@@ -87,6 +92,22 @@ export default function FicheModifier() {
   // Glissement arrière, bouton retour ou Annuler : rien ne se perd sans confirmation.
   usePreventRemove(isDirty && !enregistre && !abandonne, ({ data }) => setSortie(data.action));
 
+  // Avec des changements, le retour natif d'iOS est coupé : le glissement depuis le bord est capté ici,
+  // pour que la question soit posée dans tous les cas.
+  useEffect(() => {
+    navigation.setOptions({ gestureEnabled: !isDirty });
+  }, [navigation, isDirty]);
+
+  const glissementRetour = Gesture.Pan()
+    .enabled(isDirty && !enregistre && !abandonne)
+    .runOnJS(true)
+    .hitSlop({ left: 0, width: LARGEUR_BORD })
+    .activeOffsetX(12)
+    .failOffsetY([-24, 24])
+    .onEnd((e) => {
+      if (e.translationX > SEUIL_GLISSEMENT) router.back();
+    });
+
   useEffect(() => {
     if (enregistre) router.back();
   }, [enregistre]);
@@ -119,34 +140,40 @@ export default function FicheModifier() {
 
   return (
     <FormProvider {...form}>
-      <Ecran
-        pied={
-          <>
-            <Erreur>{enregistrer.error?.message}</Erreur>
-            <Bouton
-              testID="enregistrer"
-              titre={isDirty ? t('fiche.mettreAJour') : t('commun.enregistrer')}
-              desactive={!isDirty}
-              chargement={enregistrer.isPending}
-              onPress={form.handleSubmit((d) => enregistrer.mutate(d))}
+      <GestureDetector gesture={glissementRetour}>
+        <View style={styles.flex} collapsable={false}>
+          <Ecran
+            pied={
+              <>
+                <Erreur>{enregistrer.error?.message}</Erreur>
+                <Bouton
+                  testID="enregistrer"
+                  titre={isDirty ? t('fiche.mettreAJour') : t('commun.enregistrer')}
+                  desactive={!isDirty}
+                  chargement={enregistrer.isPending}
+                  onPress={form.handleSubmit((d) => enregistrer.mutate(d))}
+                />
+                <Bouton variante="texte" titre={t('commun.annuler')} onPress={() => router.back()} />
+              </>
+            }>
+            <T v="titre">{t('fiche.titreModifier')}</T>
+            <EtapeIdentite />
+            <EmailConnexion />
+            <Dialogue
+              visible={sortie !== null && !abandonne}
+              danger
+              titre={t('fiche.abandonTitre')}
+              texte={t('fiche.abandonTexte')}
+              oui={t('fiche.abandonOui')}
+              non={t('fiche.abandonNon')}
+              surOui={() => setAbandonne(true)}
+              surNon={() => setSortie(null)}
             />
-            <Bouton variante="texte" titre={t('commun.annuler')} onPress={() => router.back()} />
-          </>
-        }>
-        <T v="titre">{t('fiche.titreModifier')}</T>
-        <EtapeIdentite />
-        <EmailConnexion />
-        <Dialogue
-          visible={sortie !== null && !abandonne}
-          danger
-          titre={t('fiche.abandonTitre')}
-          texte={t('fiche.abandonTexte')}
-          oui={t('fiche.abandonOui')}
-          non={t('fiche.abandonNon')}
-          surOui={() => setAbandonne(true)}
-          surNon={() => setSortie(null)}
-        />
-      </Ecran>
+          </Ecran>
+        </View>
+      </GestureDetector>
     </FormProvider>
   );
 }
+
+const styles = StyleSheet.create({ flex: { flex: 1 } });
