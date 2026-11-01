@@ -139,8 +139,8 @@ export default function Referent() {
 
 const styles = StyleSheet.create({
   racine: { flex: 1 },
-  entete: { paddingHorizontal: espace.m, gap: espace.s },
-  liste: { padding: espace.m, gap: espace.m },
+  entete: { paddingHorizontal: espace.m, gap: espace.s, width: '100%', maxWidth: 720, alignSelf: 'center' },
+  liste: { padding: espace.m, gap: espace.m, width: '100%', maxWidth: 720, alignSelf: 'center' },
   colonnes: { flexDirection: 'row', gap: espace.m },
   colonne: { flex: 1, gap: 2 },
 });

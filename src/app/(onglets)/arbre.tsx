@@ -97,7 +97,7 @@ export default function Arbre() {
 
 const styles = StyleSheet.create({
   racine: { flex: 1 },
-  entete: { paddingHorizontal: espace.m, gap: espace.s },
+  entete: { paddingHorizontal: espace.m, gap: espace.s, width: '100%', maxWidth: 720, alignSelf: 'center' },
   pile: { padding: espace.m, gap: espace.s },
   resultats: { maxHeight: 240 },
   message: { padding: espace.m },

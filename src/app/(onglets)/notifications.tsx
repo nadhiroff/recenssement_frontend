@@ -113,6 +113,6 @@ export default function Notifications() {
 }
 
 const styles = StyleSheet.create({
-  liste: { padding: espace.m, gap: espace.m },
+  liste: { padding: espace.m, gap: espace.m, width: '100%', maxWidth: 720, alignSelf: 'center' },
   entete: { gap: espace.s },
 });
