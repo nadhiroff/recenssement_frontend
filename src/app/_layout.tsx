@@ -25,6 +25,7 @@ const client = new QueryClient({
 const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: 'cache_requetes', throttleTime: 2000 });
 
 const ECRANS_PUBLICS = ['accueil', 'connexion', 'code', 'confirmation'];
+const ECRANS_SANS_SESSION = ['accueil', 'connexion', 'code'];
 
 function Navigation() {
   const { sombre, c } = useTheme();
@@ -32,9 +33,13 @@ function Navigation() {
   const segments = useSegments();
 
   // Déconnexion, retrait ou session expirée : retour à l'accueil, où que l'on soit.
+  // Connecté, on ne revient pas aux écrans de connexion : changer de compte passe par la déconnexion.
   useEffect(() => {
-    if (pret && !connecte && segments[0] && !ECRANS_PUBLICS.includes(segments[0])) {
+    if (!pret) return;
+    if (!connecte && segments[0] && !ECRANS_PUBLICS.includes(segments[0])) {
       router.replace('/accueil');
+    } else if (connecte && segments[0] && ECRANS_SANS_SESSION.includes(segments[0])) {
+      router.replace('/');
     }
   }, [pret, connecte, segments]);
 
@@ -61,7 +66,10 @@ function Navigation() {
       <ThemeProvider value={sombre ? DarkTheme : DefaultTheme}>
         <StatusBar style={sombre ? 'light' : 'dark'} />
         <BandeauHorsLigne />
-        <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right', animationDuration: 250 }} />
+        <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right', animationDuration: 250 }}>
+          <Stack.Screen name="index" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="(onglets)" options={{ gestureEnabled: false }} />
+        </Stack>
       </ThemeProvider>
     </ReseauFourni>
   );

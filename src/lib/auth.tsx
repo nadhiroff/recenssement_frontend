@@ -67,13 +67,14 @@ const DELAI_DECONNEXION_MS = 2500;
 export function SessionFournie({ children }: { children: ReactNode }) {
   const client = useQueryClient();
   const [pret, setPret] = useState(false);
-  const [connecte, setConnecte] = useState(false);
+  const [jeton, setJeton] = useState<string | null>(null);
+  const connecte = jeton !== null;
 
   const enFermeture = useRef(false);
 
   const sessionPerdue = useCallback(async () => {
     await ecrireJeton(null);
-    setConnecte(false);
+    setJeton(null);
     client.clear();
   }, [client]);
 
@@ -96,13 +97,14 @@ export function SessionFournie({ children }: { children: ReactNode }) {
       if (!enFermeture.current) void sessionPerdue();
     });
     lireJeton().then((j) => {
-      setConnecte(!!j);
+      setJeton(j);
       setPret(true);
     });
   }, [sessionPerdue]);
 
   const requete = useQuery({
-    queryKey: ['moi'],
+    // Le profil appartient à une session : un changement de compte ne doit jamais relire l'ancien.
+    queryKey: ['moi', jeton?.slice(-8)],
     queryFn: () => api<Moi>('GET', '/me'),
     enabled: connecte,
     staleTime: 0,
@@ -122,15 +124,16 @@ export function SessionFournie({ children }: { children: ReactNode }) {
       moi: requete.data,
       // Un cache « sans fiche » peut être périmé : on attend le serveur avant d'orienter vers l'inscription.
       chargementMoi: connecte && !requete.data?.personne && requete.fetchStatus === 'fetching',
-      ouvrir: async (jeton) => {
-        await ecrireJeton(jeton);
-        setConnecte(true);
+      ouvrir: async (nouveau) => {
+        await ecrireJeton(nouveau);
+        client.clear();
+        setJeton(nouveau);
       },
       fermer,
       sessionPerdue,
       recharger: requete.refetch,
     }),
-    [pret, connecte, requete.data, requete.fetchStatus, fermer, sessionPerdue, requete.refetch]
+    [client, pret, connecte, requete.data, requete.fetchStatus, fermer, sessionPerdue, requete.refetch]
   );
   return <Contexte.Provider value={valeur}>{children}</Contexte.Provider>;
 }
