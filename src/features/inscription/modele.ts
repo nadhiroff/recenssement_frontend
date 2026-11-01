@@ -5,6 +5,17 @@ export const PRECISIONS = ['exacte', 'environ', 'decennie', 'inconnue'] as const
 export const TYPES_NOMS = ['vodoun', 'bapteme', 'surnom'] as const;
 export const TYPES_TIERS = ['enfant_mineur', 'parent_decede', 'aine', 'autre'] as const;
 
+const jusqua = (max: number) =>
+  z.string().refine((v) => v === '' || (/^\d{1,2}$/.test(v) && Number(v) >= 1 && Number(v) <= max), 'erreurs.date');
+
+/** Même contrôle que le serveur : le jour exige le mois, le mois exige l'année, et la date doit exister. */
+export function dateCoherente(jour: string, mois: string, annee: string): boolean {
+  if ((jour && !mois) || (mois && !annee)) return false;
+  if (!jour) return true;
+  const d = new Date(Number(annee), Number(mois) - 1, Number(jour));
+  return d.getMonth() === Number(mois) - 1 && d.getTime() <= Date.now();
+}
+
 const anneeOuVide = z.string().refine((v) => {
   if (v === '') return true;
   const n = Number(v);
@@ -26,21 +37,32 @@ export const parentSchema = z.object({
 
 export type ParentBrouillon = z.infer<typeof parentSchema>;
 
+export const identiteSchema = z
+  .object({
+    nom_famille: z.string().trim().min(1, 'erreurs.requis'),
+    prenoms: z.string().trim().min(1, 'erreurs.requis'),
+    autres_noms: z.array(z.object({ type: z.enum(TYPES_NOMS), valeur: z.string() })),
+    sexe: z.enum(['M', 'F', 'I']),
+    jour_naissance: jusqua(31),
+    mois_naissance: jusqua(12),
+    annee_naissance: anneeOuVide,
+    precision_naissance: z.enum(PRECISIONS),
+    lieu_residence: z.string(),
+    rapprochement_vu: z.boolean(),
+  })
+  .refine((v) => dateCoherente(v.jour_naissance, v.mois_naissance, v.annee_naissance), {
+    path: ['jour_naissance'],
+    message: 'erreurs.date',
+  });
+
+export type Identite = z.infer<typeof identiteSchema>;
+
 export const brouillonSchema = z.object({
   client_uuid: z.string(),
   etape: z.number(),
   type: z.enum(TYPES_TIERS).nullable(),
   present_lors_saisie: z.boolean(),
-  identite: z.object({
-    nom_famille: z.string().trim().min(1, 'erreurs.requis'),
-    prenoms: z.string().trim().min(1, 'erreurs.requis'),
-    autres_noms: z.array(z.object({ type: z.enum(TYPES_NOMS), valeur: z.string() })),
-    sexe: z.enum(['M', 'F', 'I']),
-    annee_naissance: anneeOuVide,
-    precision_naissance: z.enum(PRECISIONS),
-    lieu_residence: z.string(),
-    rapprochement_vu: z.boolean(),
-  }),
+  identite: identiteSchema,
   personne_existante_id: z.number().nullable(),
   branche_id: z.number().nullable(),
   pere: parentSchema,
@@ -81,6 +103,8 @@ export const brouillonVide = (): Brouillon => ({
     prenoms: '',
     autres_noms: [],
     sexe: 'I',
+    jour_naissance: '',
+    mois_naissance: '',
     annee_naissance: '',
     precision_naissance: 'environ',
     lieu_residence: '',
@@ -144,14 +168,16 @@ export function construireCorps(b: Brouillon, parcours: Parcours): Record<string
       nom_famille: b.identite.nom_famille.trim(),
       prenoms: b.identite.prenoms.trim(),
       autres_noms: b.identite.autres_noms.filter((n) => n.valeur.trim() !== ''),
+      jour_naissance: b.identite.jour_naissance === '' ? null : Number(b.identite.jour_naissance),
+      mois_naissance: b.identite.mois_naissance === '' ? null : Number(b.identite.mois_naissance),
       annee_naissance: annee === '' ? null : Number(annee),
       precision_naissance: annee === '' ? 'inconnue' : b.identite.precision_naissance,
     },
   };
+  if (b.personne_existante_id) corps.personne_id = b.personne_existante_id;
   if (parcours === 'tiers') {
     corps.type = b.type;
     corps.present_lors_saisie = b.present_lors_saisie;
-    if (b.personne_existante_id) corps.personne_id = b.personne_existante_id;
   }
   return corps;
 }

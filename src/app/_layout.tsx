@@ -2,7 +2,7 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -24,9 +24,19 @@ const client = new QueryClient({
 });
 const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: 'cache_requetes', throttleTime: 2000 });
 
+const ECRANS_PUBLICS = ['accueil', 'connexion', 'code', 'confirmation'];
+
 function Navigation() {
   const { sombre, c } = useTheme();
   const { pret, recharger, connecte } = useSession();
+  const segments = useSegments();
+
+  // Déconnexion, retrait ou session expirée : retour à l'accueil, où que l'on soit.
+  useEffect(() => {
+    if (pret && !connecte && segments[0] && !ECRANS_PUBLICS.includes(segments[0])) {
+      router.replace('/accueil');
+    }
+  }, [pret, connecte, segments]);
 
   useEffect(() => {
     if (pret) SplashScreen.hideAsync().catch(() => {});

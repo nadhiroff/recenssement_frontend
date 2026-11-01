@@ -93,7 +93,7 @@ function CarteDoublon({ d }: { d: Doublon }) {
         label={t('referent.fusionner')}
         valeur={choix === null ? null : String(choix)}
         onChange={(v) => setChoix(Number(v))}
-        options={[d.a, d.b].map((p) => ({ valeur: String(p.id), libelle: `n° ${p.id}` }))}
+        options={[d.a, d.b].map((p) => ({ valeur: String(p.id), libelle: t('referent.numero', { id: p.id }) }))}
       />
       {choix !== null ? (
         <Bouton titre={t('referent.confirmerFusion', { id: choix })} chargement={fusion.isPending} onPress={() => fusion.mutate(choix)} />

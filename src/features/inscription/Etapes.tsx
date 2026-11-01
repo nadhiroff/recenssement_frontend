@@ -1,7 +1,7 @@
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Bouton, Carte, Case, Champ, Choix, Muet, Squelette, T } from '@/components/ui';
+import { Bouton, Carte, Case, Champ, ChampDate, Choix, Muet, Squelette, T } from '@/components/ui';
 import { t } from '@/i18n';
 import { useSession } from '@/lib/auth';
 import { useTheme } from '@/theme';
@@ -31,8 +31,10 @@ export function EtapeType() {
 }
 
 export function EtapeIdentite() {
-  const { control, setValue } = useFormContext<Brouillon>();
+  const { control, setValue, formState } = useFormContext<Brouillon>();
   const { fields, append, remove } = useFieldArray({ control, name: 'identite.autres_noms' });
+  const [jour, mois, annee] = useWatch({ control, name: ['identite.jour_naissance', 'identite.mois_naissance', 'identite.annee_naissance'] });
+  const date = { jour, mois, annee };
   return (
     <View style={styles.pile}>
       <Controller
@@ -74,20 +76,22 @@ export function EtapeIdentite() {
           <Choix label={t('inscription.sexe')} valeur={field.value} onChange={field.onChange} options={(['M', 'F', 'I'] as const).map((v) => ({ valeur: v, libelle: t(`inscription.sexes.${v}`) }))} />
         )}
       />
-      <Controller
-        control={control}
-        name="identite.annee_naissance"
-        render={({ field, fieldState }) => (
-          <Champ testID="annee" label={t('inscription.anneeNaissance')} aide={t('inscription.anneeAide')} keyboardType="number-pad" maxLength={4} value={field.value} onChangeText={field.onChange} onBlur={field.onBlur} erreur={messageDe(fieldState.error)} />
-        )}
+      <ChampDate
+        jour={date.jour}
+        mois={date.mois}
+        annee={date.annee}
+        erreur={messageDe(formState.errors.identite?.jour_naissance ?? formState.errors.identite?.annee_naissance)}
+        onChange={(cle, v) => setValue(`identite.${cle}_naissance`, v, { shouldValidate: formState.isSubmitted })}
       />
-      <Controller
-        control={control}
-        name="identite.precision_naissance"
-        render={({ field }) => (
-          <Choix label={t('inscription.precision')} valeur={field.value} onChange={(v) => { field.onChange(v); if (v === 'inconnue') setValue('identite.annee_naissance', ''); }} options={PRECISIONS.map((p) => ({ valeur: p, libelle: t(`inscription.precisions.${p}`) }))} />
-        )}
-      />
+      {date.jour === '' ? (
+        <Controller
+          control={control}
+          name="identite.precision_naissance"
+          render={({ field }) => (
+            <Choix label={t('inscription.precision')} valeur={field.value} onChange={(v) => { field.onChange(v); if (v === 'inconnue') setValue('identite.annee_naissance', ''); }} options={PRECISIONS.map((p) => ({ valeur: p, libelle: t(`inscription.precisions.${p}`) }))} />
+          )}
+        />
+      ) : null}
       <Controller
         control={control}
         name="identite.lieu_residence"
@@ -142,7 +146,7 @@ export function EtapeVerification({
   const { control, setValue } = useFormContext<Brouillon>();
   const b = useWatch({ control }) as Brouillon;
   const lignes = [
-    { e: 'identite' as const, titre: t('inscription.etapes.identite'), valeur: `${b.identite.prenoms} ${b.identite.nom_famille}${b.identite.annee_naissance ? ` · ${b.identite.annee_naissance}` : ''}` },
+    { e: 'identite' as const, titre: t('inscription.etapes.identite'), valeur: `${b.identite.prenoms} ${b.identite.nom_famille}${b.identite.annee_naissance ? ` · ${[b.identite.jour_naissance, b.identite.mois_naissance, b.identite.annee_naissance].filter(Boolean).join('/')}` : ''}` },
     { e: 'branche' as const, titre: t('inscription.etapes.branche'), valeur: branches?.find((x) => x.id === b.branche_id)?.nom ?? '' },
     { e: 'pere' as const, titre: t('inscription.etapes.pere'), valeur: ligneParent(b.pere) },
     { e: 'mere' as const, titre: t('inscription.etapes.mere'), valeur: ligneParent(b.mere) },

@@ -1,6 +1,7 @@
-import { memo, type ReactNode, useEffect } from 'react';
+import { type ComponentRef, memo, type ReactNode, useContext, useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
+  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -19,6 +20,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { ClavierContexte } from '@/components/clavier';
 import { t } from '@/i18n';
 import { vibrerLeger } from '@/lib/retour';
 import { useTheme } from '@/theme';
@@ -137,15 +139,26 @@ export function Champ({
   ...p
 }: TextInputProps & { label: string; erreur?: string; aide?: string }) {
   const { c, echelle } = useTheme();
+  const ref = useRef<ComponentRef<typeof TextInput>>(null);
+  const clavier = useContext(ClavierContexte);
+  useEffect(() => clavier?.inscrire(ref), [clavier]);
   return (
     <View style={styles.champ}>
       <T gras v="petit">
         {label}
       </T>
       <TextInput
+        ref={ref}
         accessibilityLabel={label}
         placeholderTextColor={c.muted}
+        returnKeyType={p.multiline ? undefined : 'next'}
+        submitBehavior={p.multiline ? undefined : 'submit'}
+        onSubmitEditing={() => clavier?.deplacer(ref, 1)}
         {...p}
+        onFocus={(e) => {
+          clavier?.auFocus(ref);
+          p.onFocus?.(e);
+        }}
         style={[
           styles.saisie,
           {
@@ -159,6 +172,39 @@ export function Champ({
       />
       {aide && !erreur ? <Muet v="petit">{aide}</Muet> : null}
       <Erreur>{erreur}</Erreur>
+    </View>
+  );
+}
+
+/** Jour et mois facultatifs : l'année suffit, même approximative. */
+export function ChampDate({
+  jour,
+  mois,
+  annee,
+  onChange,
+  erreur,
+}: {
+  jour: string;
+  mois: string;
+  annee: string;
+  onChange: (cle: 'jour' | 'mois' | 'annee', valeur: string) => void;
+  erreur?: string;
+}) {
+  const chiffres = (v: string) => v.replace(/\D/g, '');
+  return (
+    <View style={styles.champ}>
+      <View style={styles.date}>
+        <View style={styles.dateCourt}>
+          <Champ testID="jour" label={t('inscription.jour')} keyboardType="number-pad" maxLength={2} value={jour} onChangeText={(v) => onChange('jour', chiffres(v))} />
+        </View>
+        <View style={styles.dateCourt}>
+          <Champ testID="mois" label={t('inscription.mois')} keyboardType="number-pad" maxLength={2} value={mois} onChangeText={(v) => onChange('mois', chiffres(v))} />
+        </View>
+        <View style={styles.dateLong}>
+          <Champ testID="annee" label={t('inscription.annee')} keyboardType="number-pad" maxLength={4} value={annee} onChangeText={(v) => onChange('annee', chiffres(v))} />
+        </View>
+      </View>
+      {erreur ? <Erreur>{erreur}</Erreur> : <Muet v="petit">{t('inscription.dateAide')}</Muet>}
     </View>
   );
 }
@@ -265,6 +311,44 @@ export function BarreProgression({ valeur }: { valeur: number }) {
   );
 }
 
+export function Dialogue({
+  visible,
+  titre,
+  texte,
+  oui,
+  non,
+  danger,
+  chargement,
+  erreur,
+  surOui,
+  surNon,
+}: {
+  visible: boolean;
+  titre: string;
+  texte: string;
+  oui: string;
+  non: string;
+  danger?: boolean;
+  chargement?: boolean;
+  erreur?: string;
+  surOui: () => void;
+  surNon: () => void;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={surNon}>
+      <View style={styles.voile}>
+        <Carte style={styles.dialogue} accessibilityViewIsModal>
+          <T v="sousTitre">{titre}</T>
+          <T>{texte}</T>
+          <Erreur>{erreur}</Erreur>
+          <Bouton testID="dialogue-oui" variante={danger ? 'danger' : 'plein'} titre={oui} chargement={chargement} onPress={surOui} />
+          <Bouton testID="dialogue-non" variante="contour" titre={non} onPress={surNon} />
+        </Carte>
+      </View>
+    </Modal>
+  );
+}
+
 /** Petit rebond à l'apparition, pour le choix validé. */
 export function useRebond() {
   const echelle = useSharedValue(1);
@@ -302,4 +386,9 @@ const styles = StyleSheet.create({
   squelette: { borderRadius: rayon.l },
   barre: { height: 6, borderRadius: 3, overflow: 'hidden' },
   remplissage: { height: 6, borderRadius: 3 },
+  date: { flexDirection: 'row', gap: espace.s },
+  dateCourt: { flex: 1 },
+  dateLong: { flex: 1.5 },
+  voile: { flex: 1, justifyContent: 'center', padding: espace.m, backgroundColor: 'rgba(0,0,0,0.5)' },
+  dialogue: { width: '100%', maxWidth: 420, alignSelf: 'center', gap: espace.m },
 });

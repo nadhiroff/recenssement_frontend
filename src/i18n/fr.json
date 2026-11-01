@@ -21,11 +21,14 @@
     "titre": "Notre lignée, ensemble",
     "texte": "Inscrivez-vous en quelques minutes et indiquez vos parents. Les référents de chaque branche vérifient les liens avant qu'ils n'entrent dans l'arbre de la famille.",
     "commencer": "Commencer",
-    "grandTexte": "Grand texte"
+    "grandTexte": "Grand texte",
+    "creer": "Créer mon compte",
+    "seConnecter": "J'ai déjà un compte",
+    "sansMotDePasse": "Pas de mot de passe à retenir : votre numéro WhatsApp suffit, un code vous est envoyé par email. Sur ce téléphone, vous restez connecté."
   },
   "connexion": {
-    "titre": "Connexion",
-    "texte": "Votre numéro WhatsApp sert d'identifiant.",
+    "titre": "Se connecter",
+    "texte": "Indiquez votre numéro WhatsApp : nous envoyons un code à l'adresse email de votre compte.",
     "telephone": "Numéro WhatsApp",
     "email": "Adresse email",
     "emailAide": "Première connexion : votre code vous sera envoyé à cette adresse.",
@@ -35,7 +38,13 @@
     "codeTexteEmail": "Regardez votre boîte email : un code à 6 chiffres vient d'être envoyé. Il expire dans 10 minutes.",
     "renvoyer": "Renvoyer le code",
     "renvoyerDans": "Renvoyer dans {s} s",
-    "verifier": "Vérifier"
+    "verifier": "Vérifier",
+    "titreCreation": "Créer mon compte",
+    "texteCreation": "Votre numéro WhatsApp sera votre identifiant. Votre email sert à recevoir le code de connexion.",
+    "numeroInconnu": "Ce numéro n'a pas encore de compte. Indiquez votre email pour le créer.",
+    "aide": "Numéro ou email perdu ? Le référent de votre branche ou l'administrateur peut rétablir votre accès.",
+    "codeEnvoyeA": "Un code à 6 chiffres vient d'être envoyé à {adresse}. Regardez aussi les courriers indésirables. Il expire dans 10 minutes.",
+    "changerNumero": "Changer de numéro"
   },
   "consentement": {
     "titre": "Vos données",
@@ -113,7 +122,14 @@
     "resoudreTitre": "Des fiches ressemblantes existent",
     "resoudreTexte": "Vérifiez avant de créer une nouvelle fiche.",
     "merci": "Merci, votre inscription est enregistrée.",
-    "brouillonRepris": "Votre brouillon a été repris."
+    "brouillonRepris": "Votre brouillon a été repris.",
+    "jour": "Jour",
+    "mois": "Mois",
+    "annee": "Année",
+    "dateAide": "Jour et mois facultatifs. Si vous ne connaissez que l'année, même approximative, cela suffit.",
+    "cestMoi": "C'est moi",
+    "pasMoi": "Ce n'est pas moi, créer ma fiche",
+    "resoudreSoi": "Une fiche à votre nom existe peut-être déjà : un proche ou un relais a pu vous inscrire. Une personne ne doit exister qu'une fois."
   },
   "tiers": {
     "types": {
@@ -140,11 +156,11 @@
     "suivi": "Suivi"
   },
   "fiche": {
-    "titre": "Ma fiche",
-    "corriger": "Corriger ma fiche",
+    "titre": "Mon profil",
+    "corriger": "Modifier mes informations",
     "inscrireProche": "Inscrire un proche",
     "retirer": "Retirer ma fiche",
-    "retirerTexte": "Votre fiche sera masquée et votre compte désactivé. Cette action se fait en lien avec l'administrateur si vous souhaitez revenir. Continuer ?",
+    "retirerTexte": "Votre fiche sera masquée et votre compte désactivé. Pour revenir, il faudra demander au référent de votre branche.",
     "deconnexion": "Se déconnecter",
     "enregistre": "Fiche mise à jour.",
     "prenoms": "Prénoms",
@@ -153,7 +169,33 @@
     "confirmerRetrait": "Oui, retirer ma fiche",
     "grandTexte": "Grand texte",
     "pasDeFiche": "Vous n'avez pas encore de fiche.",
-    "sInscrire": "M'inscrire"
+    "sInscrire": "M'inscrire",
+    "titreModifier": "Modifier mes informations",
+    "retirerTitre": "Retirer ma fiche ?",
+    "nonGarder": "Non, garder ma fiche",
+    "deconnexionTitre": "Se déconnecter ?",
+    "deconnexionTexte": "Pour revenir, il suffira de saisir votre numéro et le code reçu par email.",
+    "deconnexionAttente": "Attention : {n} envoi(s) en attente seront perdus.",
+    "oui": "Oui, me déconnecter",
+    "non": "Non, rester connecté",
+    "compte": "Mon compte",
+    "numero": "Numéro WhatsApp",
+    "emailConnexion": "Email de connexion",
+    "role": "Rôle",
+    "roles": {
+      "membre": "Membre",
+      "relais": "Relais",
+      "referent": "Référent",
+      "admin": "Administrateur"
+    },
+    "reglages": "Réglages",
+    "actions": "Actions",
+    "nouvelEmail": "Nouvel email de connexion",
+    "recevoirCode": "Recevoir un code sur cette adresse",
+    "codeEmail": "Code reçu sur la nouvelle adresse",
+    "confirmerEmail": "Confirmer le nouvel email",
+    "emailChange": "Email de connexion mis à jour.",
+    "numeroAide": "Pour changer de numéro, adressez-vous au référent de votre branche."
   },
   "statuts": {
     "declare": "Déclaré",
@@ -174,7 +216,8 @@
     "annee": "Saisissez une année à 4 chiffres, ou laissez vide.",
     "telephone": "Numéro invalide : au Bénin, +22901 suivi de 8 chiffres.",
     "email": "Adresse email invalide.",
-    "code": "Saisissez les 6 chiffres du code."
+    "code": "Saisissez les 6 chiffres du code.",
+    "date": "Cette date n'est pas valide. Indiquez au moins l'année."
   },
   "audio": {
     "inscription.etapes.identite": "Indiquez vos noms et votre année de naissance.",
@@ -241,13 +284,37 @@
     "pere": "Père : {nom}",
     "mere": "Mère : {nom}",
     "aucun": "non renseigné",
-    "confirmerFusion": "Fusionner ? La fiche n° {id} sera conservée."
+    "confirmerFusion": "Fusionner ? La fiche n° {id} sera conservée.",
+    "numero": "n° {id}"
   },
   "suivi": {
     "titre": "Suivi",
     "fiches": "{n} fiches",
     "doublons": "{n} doublons à traiter",
-    "liens": "{n} liens"
+    "liens": "{n} liens",
+    "journal": "Journal des actions",
+    "journalVide": "Aucune action pour le moment.",
+    "actions": {
+      "auth_connexion": "Connexion",
+      "personne_creation": "Fiche créée",
+      "personne_modification": "Fiche modifiée",
+      "personne_retrait": "Fiche retirée",
+      "personne_revendication": "Fiche reprise par son titulaire",
+      "personne_rattachement": "Rattachement à une branche",
+      "personne_consultation_privee": "Consultation d'une fiche privée",
+      "lien_declaration": "Lien déclaré",
+      "lien_confirmation": "Lien confirmé",
+      "lien_validation": "Lien validé",
+      "lien_rejet": "Lien rejeté",
+      "lien_examen": "Lien en examen",
+      "lien_prive": "Lien passé en privé",
+      "lien_invitation": "Invitation envoyée",
+      "lien_relance": "Relance",
+      "fusion_effectuee": "Fusion",
+      "fusion_annulee": "Fusion annulée",
+      "doublon_distinct": "Personnes distinctes",
+      "consentement_accepte": "Consentement"
+    }
   },
   "arbre": {
     "titre": "Arbre de la famille",
@@ -267,6 +334,54 @@
     "decede": "†",
     "reinitialiser": "Taille normale",
     "agrandir": "Agrandir",
-    "reduire": "Réduire"
+    "reduire": "Réduire",
+    "voirFiche": "Ouvre la fiche de cette personne"
+  },
+  "clavier": {
+    "precedent": "Précédent",
+    "suivant": "Suivant",
+    "ok": "OK"
+  },
+  "personne": {
+    "titre": "Fiche",
+    "naissance": "Naissance",
+    "deces": "Décès",
+    "decede": "Décédé(e)",
+    "autresNoms": "Autres noms",
+    "branche": "Branche",
+    "residence": "Résidence",
+    "telephone": "Téléphone",
+    "email": "Email",
+    "sexe": "Sexe",
+    "parents": "Parents",
+    "conjoints": "Conjoints",
+    "enfants": "Enfants",
+    "aucun": "Aucun lien validé pour le moment.",
+    "masque": "Le téléphone, l'email et la résidence restent visibles des seuls référents.",
+    "famille": "Famille",
+    "types": {
+      "naissance": "Prénoms",
+      "vodoun": "Vodoun",
+      "bapteme": "Baptême",
+      "surnom": "Surnom",
+      "nom_famille": "Nom de famille"
+    },
+    "vers": "vers {annee}",
+    "annees": "années {annee}",
+    "inconnue": "Inconnue",
+    "mois": [
+      "janvier",
+      "février",
+      "mars",
+      "avril",
+      "mai",
+      "juin",
+      "juillet",
+      "août",
+      "septembre",
+      "octobre",
+      "novembre",
+      "décembre"
+    ]
   }
 }

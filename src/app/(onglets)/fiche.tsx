@@ -3,90 +3,79 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 
 import { Ecran } from '@/components/Ecran';
-import { Bouton, Carte, Case, Champ, Erreur, Muet, T } from '@/components/ui';
-import { decrire } from '@/features/inscription/CarteCandidat';
+import { Bouton, Carte, Case, Dialogue, Muet, T } from '@/components/ui';
+import { EnteteFiche, FamilleFiche, InfosFiche, Ligne } from '@/features/personne/Details';
 import { t } from '@/i18n';
 import { api } from '@/lib/api';
 import { useSession } from '@/lib/auth';
-import { vibrerSucces } from '@/lib/retour';
+import { useReseau } from '@/lib/reseau';
 import { useTheme } from '@/theme';
 
 export default function Fiche() {
-  const { moi, fermer, recharger } = useSession();
+  const { moi, fermer, sessionPerdue } = useSession();
+  const { enAttente } = useReseau();
   const { grandTexte, basculerGrandTexte } = useTheme();
   const p = moi?.personne;
-  const [edition, setEdition] = useState(false);
-  const [retrait, setRetrait] = useState(false);
-  const [prenoms, setPrenoms] = useState('');
-  const [lieu, setLieu] = useState('');
-  const [annee, setAnnee] = useState('');
+  const [demandeDeconnexion, setDemandeDeconnexion] = useState(false);
+  const [demandeRetrait, setDemandeRetrait] = useState(false);
 
-  const enregistrer = useMutation({
-    mutationFn: () =>
-      api('PATCH', `/personnes/${p?.id}`, {
-        prenoms,
-        lieu_residence: lieu,
-        annee_naissance: annee === '' ? null : Number(annee),
-      }),
-    onSuccess: async () => {
-      vibrerSucces();
-      await recharger();
-      setEdition(false);
-    },
-  });
+  const deconnexion = useMutation({ mutationFn: fermer });
   const retirer = useMutation({
     mutationFn: () => api('POST', `/personnes/${p?.id}/retrait`, { confirmation: true }),
-    onSuccess: async () => {
-      await fermer();
-      router.replace('/accueil');
-    },
+    onSuccess: sessionPerdue,
   });
-
-  const ouvrirEdition = () => {
-    setPrenoms(p?.noms.find((n) => n.type === 'naissance')?.valeur ?? '');
-    setLieu(p?.lieu_residence ?? '');
-    setAnnee(p?.annee_naissance ? String(p.annee_naissance) : '');
-    setEdition(true);
-  };
 
   return (
     <Ecran>
-      <T v="titre">{t('fiche.titre')}</T>
       {p ? (
-        <Carte>
-          <T gras>{p.nom_complet}</T>
-          {decrire(p) ? <Muet>{decrire(p)}</Muet> : null}
-          {p.lieu_residence ? <Muet>{p.lieu_residence}</Muet> : null}
-          <Muet>{moi?.telephone}</Muet>
-        </Carte>
+        <>
+          <EnteteFiche p={p} />
+          <Bouton testID="modifier-fiche" titre={t('fiche.corriger')} onPress={() => router.push('/fiche-modifier')} />
+          <InfosFiche p={p} />
+          <FamilleFiche id={p.id} />
+        </>
       ) : (
-        <Bouton titre={t('fiche.sInscrire')} onPress={() => router.push('/consentement')} />
+        <>
+          <T v="titre">{t('fiche.titre')}</T>
+          <Muet>{t('fiche.pasDeFiche')}</Muet>
+          <Bouton titre={t('fiche.sInscrire')} onPress={() => router.push('/consentement')} />
+        </>
       )}
-      {p && edition ? (
-        <Carte>
-          <Champ label={t('fiche.prenoms')} value={prenoms} onChangeText={setPrenoms} />
-          <Champ label={t('fiche.annee')} keyboardType="number-pad" maxLength={4} value={annee} onChangeText={setAnnee} />
-          <Champ label={t('fiche.lieu')} value={lieu} onChangeText={setLieu} />
-          <Erreur>{enregistrer.error?.message}</Erreur>
-          <Bouton titre={t('commun.enregistrer')} chargement={enregistrer.isPending} onPress={() => enregistrer.mutate()} />
-          <Bouton variante="texte" titre={t('commun.annuler')} onPress={() => setEdition(false)} />
-        </Carte>
-      ) : null}
-      {p && !edition ? <Bouton variante="contour" titre={t('fiche.corriger')} onPress={ouvrirEdition} /> : null}
+      <Carte>
+        <T v="sousTitre">{t('fiche.compte')}</T>
+        <Ligne libelle={t('fiche.numero')} valeur={moi?.telephone} />
+        <Ligne libelle={t('fiche.emailConnexion')} valeur={moi?.email} />
+        {moi ? <Ligne libelle={t('fiche.role')} valeur={t(`fiche.roles.${moi.role}`)} /> : null}
+      </Carte>
       {p ? <Bouton variante="contour" titre={t('fiche.inscrireProche')} onPress={() => router.push('/tiers')} /> : null}
       <Case coche={grandTexte} onChange={basculerGrandTexte}>
         {t('fiche.grandTexte')}
       </Case>
-      <Bouton variante="texte" titre={t('fiche.deconnexion')} onPress={fermer} />
-      {p && retrait ? (
-        <Carte>
-          <T>{t('fiche.retirerTexte')}</T>
-          <Erreur>{retirer.error?.message}</Erreur>
-          <Bouton variante="danger" titre={t('fiche.confirmerRetrait')} chargement={retirer.isPending} onPress={() => retirer.mutate()} />
-          <Bouton variante="texte" titre={t('commun.annuler')} onPress={() => setRetrait(false)} />
-        </Carte>
-      ) : null}
-      {p && !retrait ? <Bouton variante="texte" titre={t('fiche.retirer')} onPress={() => setRetrait(true)} /> : null}
+      <Bouton testID="deconnexion" variante="contour" titre={t('fiche.deconnexion')} onPress={() => setDemandeDeconnexion(true)} />
+      {p ? <Bouton testID="retirer" variante="texte" titre={t('fiche.retirer')} onPress={() => setDemandeRetrait(true)} /> : null}
+
+      <Dialogue
+        visible={demandeDeconnexion}
+        titre={t('fiche.deconnexionTitre')}
+        texte={[t('fiche.deconnexionTexte'), enAttente > 0 ? t('fiche.deconnexionAttente', { n: enAttente }) : ''].filter(Boolean).join(' ')}
+        oui={t('fiche.oui')}
+        non={t('fiche.non')}
+        chargement={deconnexion.isPending}
+        surOui={() => deconnexion.mutate()}
+        surNon={() => setDemandeDeconnexion(false)}
+      />
+      <Dialogue
+        visible={demandeRetrait}
+        danger
+        titre={t('fiche.retirerTitre')}
+        texte={t('fiche.retirerTexte')}
+        oui={t('fiche.confirmerRetrait')}
+        non={t('fiche.nonGarder')}
+        chargement={retirer.isPending}
+        erreur={retirer.error?.message}
+        surOui={() => retirer.mutate()}
+        surNon={() => setDemandeRetrait(false)}
+      />
     </Ecran>
   );
 }

@@ -15,7 +15,7 @@ import { espace, rayon } from '@/theme/tokens';
 const CASES = [0, 1, 2, 3, 4, 5];
 
 export default function Code() {
-  const { telephone } = useLocalSearchParams<{ telephone: string }>();
+  const { telephone, destination } = useLocalSearchParams<{ telephone: string; destination?: string }>();
   const { ouvrir } = useSession();
   const { c, echelle } = useTheme();
   const champ = useRef<ComponentRef<typeof TextInput>>(null);
@@ -65,7 +65,7 @@ export default function Code() {
   return (
     <Ecran pied={<Bouton testID="verifier" titre={t('connexion.verifier')} chargement={occupe} onPress={() => verifier(code)} />}>
       <T v="titre">{t('connexion.codeTitre')}</T>
-      <Muet>{t('connexion.codeTexteEmail')}</Muet>
+      <Muet>{destination ? t('connexion.codeEnvoyeA', { adresse: destination }) : t('connexion.codeTexteEmail')}</Muet>
       <Pressable onPress={() => champ.current?.focus()} style={styles.cases} accessibilityLabel={t('connexion.codeTitre')}>
         {CASES.map((i) => (
           <View key={i} style={[styles.case, { backgroundColor: c.surface, borderColor: i === code.length ? c.secondary : c.bordure }]}>
@@ -95,6 +95,8 @@ export default function Code() {
         titre={attente > 0 ? t('connexion.renvoyerDans', { s: attente }) : t('connexion.renvoyer')}
         onPress={renvoyer}
       />
+      <Bouton variante="texte" titre={t('connexion.changerNumero')} onPress={() => router.back()} />
+      <Muet v="petit">{t('connexion.aide')}</Muet>
     </Ecran>
   );
 }

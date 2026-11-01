@@ -10,6 +10,14 @@ import type { StatBranche } from '@/lib/types';
 import { useTheme } from '@/theme';
 import { couleurStatut, espace, type StatutLien } from '@/theme/tokens';
 
+type ActionJournal = { id: number; action: string; entite_type: string | null; entite_id: number | null; cree_le: string };
+
+const libelleAction = (action: string) => {
+  const cle = `suivi.actions.${action.replace('.', '_')}`;
+  const texte = t(cle);
+  return texte === cle ? action : texte;
+};
+
 const ORDRE: StatutLien[] = ['valide', 'confirme', 'declare', 'en_examen', 'prive', 'rejete'];
 
 /** Barre empilée sobre : les chiffres de la légende portent la valeur, la couleur seule ne dit rien. */
@@ -42,12 +50,25 @@ const CarteBranche = memo(function CarteBranche({ b }: { b: StatBranche }) {
 
 export default function Suivi() {
   const stats = useQuery({ queryKey: ['stats'], queryFn: () => api<StatBranche[]>('GET', '/stats') });
+  const journal = useQuery({ queryKey: ['journal'], queryFn: () => api<ActionJournal[]>('GET', '/journal?per_page=30') });
   return (
     <Ecran>
       <T v="titre">{t('suivi.titre')}</T>
       {stats.isPending ? <Squelette hauteur={180} /> : null}
       <Erreur>{stats.error?.message}</Erreur>
       {stats.data?.map((b) => <CarteBranche key={b.branche_id} b={b} />)}
+      <T v="sousTitre">{t('suivi.journal')}</T>
+      <Carte>
+        {journal.isPending ? <Squelette hauteur={96} /> : null}
+        <Erreur>{journal.error?.message}</Erreur>
+        {journal.data?.length === 0 ? <Muet>{t('suivi.journalVide')}</Muet> : null}
+        {journal.data?.map((j) => (
+          <View key={j.id} style={styles.action}>
+            <T v="petit" gras>{libelleAction(j.action)}</T>
+            <Muet v="petit">{`${j.cree_le.slice(0, 16)} · ${j.entite_type ?? ''} ${j.entite_id ?? ''}`}</Muet>
+          </View>
+        ))}
+      </Carte>
     </Ecran>
   );
 }
@@ -58,4 +79,5 @@ const styles = StyleSheet.create({
   ligne: { flexDirection: 'row', alignItems: 'center', gap: espace.s },
   point: { width: 10, height: 10, borderRadius: 5 },
   libelle: { flex: 1 },
+  action: { paddingVertical: 2 },
 });

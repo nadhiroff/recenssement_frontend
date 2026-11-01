@@ -20,12 +20,14 @@ export default function Accueil() {
         </T>
         <T v="titre">{t('accueil.titre')}</T>
         <Muet>{t('accueil.texte')}</Muet>
+        <Muet>{t('accueil.sansMotDePasse')}</Muet>
       </View>
       <View style={styles.bas}>
         <Case coche={grandTexte} onChange={basculerGrandTexte}>
           {t('accueil.grandTexte')}
         </Case>
-        <Bouton testID="commencer" titre={t('accueil.commencer')} onPress={() => router.push('/connexion')} />
+        <Bouton testID="commencer" titre={t('accueil.creer')} onPress={() => router.push({ pathname: '/connexion', params: { mode: 'creation' } })} />
+        <Bouton testID="se-connecter" variante="contour" titre={t('accueil.seConnecter')} onPress={() => router.push('/connexion')} />
       </View>
     </View>
   );

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { memo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
@@ -53,12 +54,7 @@ export const Noeud = memo(function Noeud({ noeud }: { noeud: NoeudArbre }) {
   const annees = p.annee_naissance ? `${p.precision_naissance === 'exacte' ? '' : '~'}${p.annee_naissance}` : '';
   return (
     <Animated.View entering={FadeInDown.duration(DUREE.normale).reduceMotion(ReduceMotion.System)} style={styles.noeud}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ expanded: ouvert }}
-        accessibilityHint={extensible ? t('arbre.voirSuite') : undefined}
-        disabled={!extensible}
-        onPress={() => setOuvert((v) => !v)}
+      <View
         style={[
           styles.fiche,
           {
@@ -68,15 +64,30 @@ export const Noeud = memo(function Noeud({ noeud }: { noeud: NoeudArbre }) {
             borderWidth: provisoire || p.est_fondateur ? 2 : 1,
           },
         ]}>
-        <View style={styles.texte}>
+        <Pressable
+          testID={`personne-${p.id}`}
+          accessibilityRole="button"
+          accessibilityHint={t('arbre.voirFiche')}
+          onPress={() => router.push(`/personne/${p.id}`)}
+          style={styles.texte}>
           <T gras>{`${p.nom_complet}${p.est_decede ? ` ${t('arbre.decede')}` : ''}`}</T>
           {annees || provisoire ? (
             <Muet v="petit">{[annees, provisoire ? t(`statuts.${statut}`) : ''].filter(Boolean).join(' · ')}</Muet>
           ) : null}
           {p.est_fondateur ? <T v="petit" gras>{t('arbre.fondateur')}</T> : null}
-        </View>
-        {extensible ? <T gras couleur={c.primary}>{ouvert ? '−' : '+'}</T> : null}
-      </Pressable>
+        </Pressable>
+        {extensible ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={ouvert ? t('arbre.masquer') : t('arbre.voirSuite')}
+            accessibilityState={{ expanded: ouvert }}
+            hitSlop={8}
+            onPress={() => setOuvert((v) => !v)}
+            style={[styles.deplier, { borderColor: c.primary }]}>
+            <T gras couleur={c.primary}>{ouvert ? '−' : '+'}</T>
+          </Pressable>
+        ) : null}
+      </View>
       {ouvert ? prechargé ? <Foyers foyers={noeud.foyers ?? []} /> : <Sous racine={p.id} /> : null}
     </Animated.View>
   );
@@ -86,6 +97,7 @@ const styles = StyleSheet.create({
   noeud: { gap: espace.xs },
   fiche: { flexDirection: 'row', alignItems: 'center', minHeight: 56, minWidth: 240, paddingHorizontal: espace.m, paddingVertical: espace.s, borderRadius: rayon.m, gap: espace.s },
   texte: { flex: 1 },
+  deplier: { width: 40, height: 40, borderRadius: 20, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   descendance: { marginLeft: espace.m, paddingLeft: espace.m, borderLeftWidth: 2, gap: espace.s },
   foyer: { gap: espace.xs },
 });

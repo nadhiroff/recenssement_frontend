@@ -6,10 +6,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { api, definirSurDeconnexion } from './api';
+import { effacerFile } from './file';
 import { ecrireJeton, lireJeton } from './stockage';
 
 export type Nom = { id?: number; type: string; valeur: string; principal?: boolean };
@@ -20,6 +24,8 @@ export type Personne = {
   noms: Nom[];
   sexe: 'M' | 'F' | 'I';
   annee_naissance: number | null;
+  mois_naissance?: number | null;
+  jour_naissance?: number | null;
   precision_naissance: string;
   annee_deces: number | null;
   est_decede: boolean;
@@ -48,30 +54,52 @@ type Session = {
   moi: Moi | undefined;
   chargementMoi: boolean;
   ouvrir: (jeton: string) => Promise<void>;
+  /** Déconnexion demandée : ferme la session sur le serveur et efface les données locales. */
   fermer: () => Promise<void>;
+  /** La session n'existe déjà plus : on retourne simplement à l'accueil. */
+  sessionPerdue: () => Promise<void>;
   recharger: () => Promise<unknown>;
 };
 
 const Contexte = createContext<Session | null>(null);
+const DELAI_DECONNEXION_MS = 2500;
 
 export function SessionFournie({ children }: { children: ReactNode }) {
   const client = useQueryClient();
   const [pret, setPret] = useState(false);
   const [connecte, setConnecte] = useState(false);
 
-  const fermer = useCallback(async () => {
+  const enFermeture = useRef(false);
+
+  const sessionPerdue = useCallback(async () => {
     await ecrireJeton(null);
     setConnecte(false);
     client.clear();
   }, [client]);
 
+  const fermer = useCallback(async () => {
+    if (enFermeture.current) return;
+    enFermeture.current = true;
+    // Sans réseau on n'attend pas : le jeton est de toute façon oublié sur ce téléphone.
+    await Promise.race([
+      api('POST', '/auth/logout', {}).catch(() => {}),
+      new Promise((fini) => setTimeout(fini, DELAI_DECONNEXION_MS)),
+    ]);
+    await AsyncStorage.multiRemove(['brouillon.soi', 'brouillon.tiers']);
+    await effacerFile();
+    await sessionPerdue();
+    enFermeture.current = false;
+  }, [sessionPerdue]);
+
   useEffect(() => {
-    definirSurDeconnexion(() => void fermer());
+    definirSurDeconnexion(() => {
+      if (!enFermeture.current) void sessionPerdue();
+    });
     lireJeton().then((j) => {
       setConnecte(!!j);
       setPret(true);
     });
-  }, [fermer]);
+  }, [sessionPerdue]);
 
   const requete = useQuery({
     queryKey: ['moi'],
@@ -79,6 +107,13 @@ export function SessionFournie({ children }: { children: ReactNode }) {
     enabled: connecte,
     staleTime: 0,
   });
+
+  // Le formulaire doit rester utilisable hors ligne : la liste des branches est gardée dès la connexion.
+  useEffect(() => {
+    if (connecte) {
+      void client.prefetchQuery({ queryKey: ['branches'], queryFn: () => api('GET', '/branches'), staleTime: 3600_000 });
+    }
+  }, [client, connecte]);
 
   const valeur = useMemo<Session>(
     () => ({
@@ -92,9 +127,10 @@ export function SessionFournie({ children }: { children: ReactNode }) {
         setConnecte(true);
       },
       fermer,
+      sessionPerdue,
       recharger: requete.refetch,
     }),
-    [pret, connecte, requete.data, requete.fetchStatus, fermer, requete.refetch]
+    [pret, connecte, requete.data, requete.fetchStatus, fermer, sessionPerdue, requete.refetch]
   );
   return <Contexte.Provider value={valeur}>{children}</Contexte.Provider>;
 }

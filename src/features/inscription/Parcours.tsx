@@ -211,11 +211,11 @@ function Formulaire({ parcours, initial }: { parcours: TypeParcours; initial: Br
         <View style={[styles.flex, { backgroundColor: c.background }]}>
           <ScrollView contentContainerStyle={styles.modale}>
             <T v="titre">{t('inscription.resoudreTitre')}</T>
-            <Muet>{t('inscription.resoudreTexte')}</Muet>
+            <Muet>{resolution?.cible === 'identite' && parcours === 'soi' ? t('inscription.resoudreSoi') : t('inscription.resoudreTexte')}</Muet>
             {resolution?.candidats.map((cand, i) => (
-              <CarteCandidat key={i} candidat={cand} rang={i} onChoisir={() => resoudre(cand)} />
+              <CarteCandidat key={i} candidat={cand} rang={i} cestMoi={resolution.cible === 'identite' && parcours === 'soi'} onChoisir={() => resoudre(cand)} />
             ))}
-            <Bouton variante="contour" titre={t('inscription.pasLui')} onPress={() => resoudre(null)} />
+            <Bouton testID="nouvelle-fiche" variante="contour" titre={resolution?.cible === 'identite' && parcours === 'soi' ? t('inscription.pasMoi') : t('inscription.pasLui')} onPress={() => resoudre(null)} />
           </ScrollView>
         </View>
       </Modal>
@@ -234,7 +234,8 @@ async function validerEtape(
       if (v.type === 'aine' && !v.present_lors_saisie) return t('tiers.presentObligatoire');
       return true;
     case 'identite':
-      return (await form.trigger('identite')) ? true : t('erreurs.requis');
+      if (await form.trigger('identite')) return true;
+      return form.getFieldState('identite.jour_naissance').error ? t('erreurs.date') : t('erreurs.requis');
     case 'branche':
       return v.branche_id ? true : t('inscription.brancheObligatoire');
     case 'pere':

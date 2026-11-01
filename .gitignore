@@ -42,3 +42,6 @@ example
 /ios
 /android
 dist-android/
+
+# Documents de la famille : jamais dans le dépôt
+Document_test/

@@ -53,3 +53,12 @@ export type StatBranche = {
   doublons: number;
   liens: Record<StatutLien, number>;
 };
+
+export type ProcheFamille = {
+  personne: Personne;
+  role: 'pere' | 'mere' | null;
+  rang: number | null;
+  statut: StatutLien | null;
+};
+
+export type FamillePersonne = { parents: ProcheFamille[]; conjoints: ProcheFamille[]; enfants: ProcheFamille[] };

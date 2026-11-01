@@ -42,6 +42,9 @@ export async function ajouterEnvoi(envoi: Omit<Envoi, 'cree_le'>) {
   await ecrire([...file.filter((e) => e.client_uuid !== envoi.client_uuid), { ...envoi, cree_le: Date.now() }]);
 }
 
+/** À la déconnexion : les envois d'un compte ne doivent pas partir sous le compte suivant. */
+export const effacerFile = () => ecrire([]);
+
 /**
  * Rejoue la file dans l'ordre. Sans réseau ou sur erreur serveur, l'envoi reste en file ;
  * une réponse 4xx le sort de la file et remonte à l'appelant, qui décide quoi en faire.

@@ -12,12 +12,12 @@ export type Candidat = { anonyme: true } | { personne: Personne; score: number; 
 export function decrire(p: Personne): string {
   const autres = p.noms.filter((n) => !['nom_famille', 'naissance'].includes(n.type)).map((n) => n.valeur);
   const annee = p.annee_naissance
-    ? p.precision_naissance === 'exacte' ? String(p.annee_naissance) : `vers ${p.annee_naissance}`
+    ? p.precision_naissance === 'exacte' ? String(p.annee_naissance) : t('personne.vers', { annee: p.annee_naissance })
     : '';
   return [annee, ...autres].filter(Boolean).join(' · ');
 }
 
-export function CarteCandidat({ candidat, rang, onChoisir }: { candidat: Candidat; rang: number; onChoisir: () => void }) {
+export function CarteCandidat({ candidat, rang, onChoisir, cestMoi }: { candidat: Candidat; rang: number; onChoisir: () => void; cestMoi?: boolean }) {
   const { style, rebondir } = useRebond();
   const entree = FadeInDown.delay(rang * 60).duration(DUREE.normale).reduceMotion(ReduceMotion.System);
 
@@ -43,7 +43,7 @@ export function CarteCandidat({ candidat, rang, onChoisir }: { candidat: Candida
           <Bouton
             testID={`choisir-${p.id}`}
             variante="contour"
-            titre={p.sexe === 'F' ? t('inscription.cestElle') : t('inscription.cestLui')}
+            titre={cestMoi ? t('inscription.cestMoi') : p.sexe === 'F' ? t('inscription.cestElle') : t('inscription.cestLui')}
             onPress={() => {
               rebondir();
               vibrerSucces();

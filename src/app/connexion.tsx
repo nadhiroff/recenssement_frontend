@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -18,7 +18,10 @@ const schema = z.object({
 type Saisie = z.input<typeof schema>;
 
 export default function Connexion() {
-  const [emailRequis, setEmailRequis] = useState(false);
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const creation = mode === 'creation';
+  const [emailRequis, setEmailRequis] = useState(creation);
+  const [numeroInconnu, setNumeroInconnu] = useState(false);
   const [erreur, setErreur] = useState<string>();
   const { control, handleSubmit, formState } = useForm<Saisie, unknown, z.output<typeof schema>>({
     resolver: zodResolver(schema),
@@ -28,18 +31,22 @@ export default function Connexion() {
   const envoyer = handleSubmit(async ({ telephone, email }) => {
     setErreur(undefined);
     try {
-      await api('POST', '/auth/otp/request', { telephone, email: email || undefined });
-      router.push({ pathname: '/code', params: { telephone } });
+      const { destination } = await api<{ destination: string | null }>('POST', '/auth/otp/request', { telephone, email: email || undefined });
+      router.push({ pathname: '/code', params: { telephone, destination: destination ?? '' } });
     } catch (e) {
-      if (e instanceof ErreurApi && e.code === 'email_requis') setEmailRequis(true);
-      else setErreur((e as Error).message);
+      if (e instanceof ErreurApi && e.code === 'email_requis') {
+        setEmailRequis(true);
+        setNumeroInconnu(true);
+      } else {
+        setErreur((e as Error).message);
+      }
     }
   });
 
   return (
     <Ecran pied={<Bouton testID="recevoir" titre={t('connexion.recevoir')} chargement={formState.isSubmitting} onPress={envoyer} />}>
-      <T v="titre">{t('connexion.titre')}</T>
-      <Muet>{t('connexion.texte')}</Muet>
+      <T v="titre">{creation ? t('connexion.titreCreation') : t('connexion.titre')}</T>
+      <Muet>{creation ? t('connexion.texteCreation') : t('connexion.texte')}</Muet>
       <Controller
         control={control}
         name="telephone"
@@ -75,7 +82,9 @@ export default function Connexion() {
           )}
         />
       ) : null}
+      {numeroInconnu ? <Muet>{t('connexion.numeroInconnu')}</Muet> : null}
       <Erreur>{erreur}</Erreur>
+      <Muet v="petit">{t('connexion.aide')}</Muet>
     </Ecran>
   );
 }
