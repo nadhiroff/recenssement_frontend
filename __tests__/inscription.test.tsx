@@ -127,6 +127,37 @@ describe('parcours d\'inscription', () => {
   });
 });
 
+describe('inscription en cours', () => {
+  const brouillonTiers = () => ({ ...brouillonVide(), etape: 1, type: 'enfant_mineur' as const });
+  const rendreTiers = () => render(<Parcours parcours="tiers" />, { wrapper: Enveloppe });
+
+  it('propose de reprendre ou de recommencer au lieu de rouvrir en silence', async () => {
+    await ecrireBrouillon('tiers', brouillonTiers());
+    await rendreTiers();
+    expect(await screen.findByText('Inscription en cours')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('dialogue-non'));
+    expect(await screen.findByText('Qui inscrivez-vous ?')).toBeTruthy();
+    expect((await lireBrouillon('tiers'))?.type).toBeNull();
+  });
+
+  it('un formulaire vide ne pose pas la question', async () => {
+    await rendreTiers();
+    expect(await screen.findByText('Qui inscrivez-vous ?')).toBeTruthy();
+    expect(screen.queryByText('Inscription en cours')).toBeNull();
+  });
+
+  it('Annuler efface le brouillon, après confirmation', async () => {
+    await ecrireBrouillon('tiers', brouillonTiers());
+    await rendreTiers();
+    await fireEvent.press(await screen.findByTestId('dialogue-oui'));
+    await fireEvent.press(await screen.findByTestId('annuler-inscription'));
+    expect(await screen.findByText('Annuler cette inscription ?')).toBeTruthy();
+    await fireEvent.press(screen.getAllByTestId('dialogue-oui').at(-1)!);
+    await waitFor(() => expect(router.back).toHaveBeenCalled());
+    expect(await lireBrouillon('tiers')).toBeNull();
+  });
+});
+
 describe('lireBrouillon', () => {
   it('reprend un brouillon encore incomplet avec son consentement et son uuid', async () => {
     const b = { ...brouillonVide(), consentement: true };

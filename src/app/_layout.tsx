@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { BandeauHorsLigne } from '@/components/BandeauHorsLigne';
 import { effacerBrouillon, type Parcours } from '@/features/inscription/modele';
+import { useGestionAlertes } from '@/lib/alertes';
 import { SessionFournie, useSession } from '@/lib/auth';
 import { ReseauFourni } from '@/lib/reseau';
 import { ThemeFourni, useTheme } from '@/theme';
@@ -31,6 +32,7 @@ function Navigation() {
   const { sombre, c } = useTheme();
   const { pret, recharger, connecte } = useSession();
   const segments = useSegments();
+  useGestionAlertes();
 
   // Déconnexion, retrait ou session expirée : retour à l'accueil, où que l'on soit.
   // Connecté, on ne revient pas aux écrans de connexion : changer de compte passe par la déconnexion.
@@ -69,6 +71,7 @@ function Navigation() {
         <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right', animationDuration: 250 }}>
           <Stack.Screen name="index" options={{ gestureEnabled: false }} />
           <Stack.Screen name="(onglets)" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="inscription" options={{ gestureEnabled: false }} />
         </Stack>
       </ThemeProvider>
     </ReseauFourni>

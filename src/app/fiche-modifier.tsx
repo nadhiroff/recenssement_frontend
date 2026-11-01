@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import { router, useNavigation, usePreventRemove } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { FormProvider, useForm, useFormState } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Ecran } from '@/components/Ecran';
-import { Bouton, Carte, Champ, Erreur, Muet, T } from '@/components/ui';
+import { Bouton, Carte, Champ, Dialogue, Erreur, Muet, T } from '@/components/ui';
 import { EtapeIdentite } from '@/features/inscription/Etapes';
 import { identiteSchema, TYPES_NOMS } from '@/features/inscription/modele';
 import { t } from '@/i18n';
@@ -78,6 +78,24 @@ export default function FicheModifier() {
     },
   });
 
+  const { isDirty } = useFormState({ control: form.control });
+  const navigation = useNavigation();
+  const [enregistre, setEnregistre] = useState(false);
+  const [abandonne, setAbandonne] = useState(false);
+  const [sortie, setSortie] = useState<Parameters<typeof navigation.dispatch>[0] | null>(null);
+
+  // Glissement arrière, bouton retour ou Annuler : rien ne se perd sans confirmation.
+  usePreventRemove(isDirty && !enregistre && !abandonne, ({ data }) => setSortie(data.action));
+
+  useEffect(() => {
+    if (enregistre) router.back();
+  }, [enregistre]);
+
+  // La protection doit être levée avant de relancer la sortie, sinon elle se bloque elle-même.
+  useEffect(() => {
+    if (abandonne && sortie) navigation.dispatch(sortie);
+  }, [abandonne, sortie, navigation]);
+
   const enregistrer = useMutation({
     mutationFn: ({ identite: d }: Formulaire) =>
       api('PATCH', `/personnes/${p?.id}`, {
@@ -95,7 +113,7 @@ export default function FicheModifier() {
       vibrerSucces();
       client.invalidateQueries({ queryKey: ['personne'] });
       await recharger();
-      router.back();
+      setEnregistre(true);
     },
   });
 
@@ -105,13 +123,29 @@ export default function FicheModifier() {
         pied={
           <>
             <Erreur>{enregistrer.error?.message}</Erreur>
-            <Bouton testID="enregistrer" titre={t('commun.enregistrer')} chargement={enregistrer.isPending} onPress={form.handleSubmit((d) => enregistrer.mutate(d))} />
+            <Bouton
+              testID="enregistrer"
+              titre={isDirty ? t('fiche.mettreAJour') : t('commun.enregistrer')}
+              desactive={!isDirty}
+              chargement={enregistrer.isPending}
+              onPress={form.handleSubmit((d) => enregistrer.mutate(d))}
+            />
             <Bouton variante="texte" titre={t('commun.annuler')} onPress={() => router.back()} />
           </>
         }>
         <T v="titre">{t('fiche.titreModifier')}</T>
         <EtapeIdentite />
         <EmailConnexion />
+        <Dialogue
+          visible={sortie !== null && !abandonne}
+          danger
+          titre={t('fiche.abandonTitre')}
+          texte={t('fiche.abandonTexte')}
+          oui={t('fiche.abandonOui')}
+          non={t('fiche.abandonNon')}
+          surOui={() => setAbandonne(true)}
+          surNon={() => setSortie(null)}
+        />
       </Ecran>
     </FormProvider>
   );

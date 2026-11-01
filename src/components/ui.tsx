@@ -331,7 +331,7 @@ export function Dialogue({
   danger?: boolean;
   chargement?: boolean;
   erreur?: string;
-  surOui: () => void;
+  surOui: () => void | Promise<void>;
   surNon: () => void;
 }) {
   return (

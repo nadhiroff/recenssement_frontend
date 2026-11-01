@@ -17,7 +17,7 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'light' },
   NotificationFeedbackType: { Success: 'success' },
 }));
-jest.mock('expo-router', () => ({ router: { replace: jest.fn(), push: jest.fn() } }));
+jest.mock('expo-router', () => ({ router: { replace: jest.fn(), push: jest.fn(), back: jest.fn() } }));
 jest.mock('react-native-reanimated', () => {
   const { View } = require('react-native');
   const chaine = new Proxy(function () {}, { get: () => () => chaine, apply: () => chaine });

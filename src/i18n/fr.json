@@ -129,7 +129,15 @@
     "dateAide": "Jour et mois facultatifs. Si vous ne connaissez que l'année, même approximative, cela suffit.",
     "cestMoi": "C'est moi",
     "pasMoi": "Ce n'est pas moi, créer ma fiche",
-    "resoudreSoi": "Une fiche à votre nom existe peut-être déjà : un proche ou un relais a pu vous inscrire. Une personne ne doit exister qu'une fois."
+    "resoudreSoi": "Une fiche à votre nom existe peut-être déjà : un proche ou un relais a pu vous inscrire. Une personne ne doit exister qu'une fois.",
+    "repriseTitre": "Inscription en cours",
+    "repriseTexte": "Vous aviez commencé une inscription. Voulez-vous la reprendre où vous l'aviez laissée ?",
+    "reprendre": "Reprendre",
+    "recommencer": "Recommencer",
+    "abandonTitre": "Annuler cette inscription ?",
+    "abandonTexte": "Ce que vous avez saisi sera effacé.",
+    "abandonOui": "Oui, annuler l'inscription",
+    "abandonNon": "Non, continuer"
   },
   "tiers": {
     "types": {
@@ -195,7 +203,12 @@
     "codeEmail": "Code reçu sur la nouvelle adresse",
     "confirmerEmail": "Confirmer le nouvel email",
     "emailChange": "Email de connexion mis à jour.",
-    "numeroAide": "Pour changer de numéro, adressez-vous au référent de votre branche."
+    "numeroAide": "Pour changer de numéro, adressez-vous au référent de votre branche.",
+    "mettreAJour": "Mettre à jour",
+    "abandonTitre": "Annuler les modifications ?",
+    "abandonTexte": "Ce que vous venez de changer ne sera pas enregistré.",
+    "abandonOui": "Oui, annuler les modifications",
+    "abandonNon": "Non, continuer à modifier"
   },
   "statuts": {
     "declare": "Déclaré",
@@ -248,7 +261,14 @@
   },
   "notifications": {
     "titre": "Alertes",
-    "vide": "Aucune alerte pour le moment."
+    "vide": "Aucune alerte pour le moment.",
+    "nouvelle": "Vous avez une nouvelle alerte.",
+    "toutLu": "Tout marquer comme lu ({n})",
+    "activerTitre": "Activer les alertes sur ce téléphone",
+    "activerTexte": "Soyez prévenu quand un lien est confirmé, validé ou refusé.",
+    "activerRefuse": "Les alertes sont bloquées pour cette application. Autorisez-les dans les réglages du téléphone.",
+    "activer": "Activer",
+    "ouvrirReglages": "Ouvrir les réglages"
   },
   "referent": {
     "titre": "Espace référent",

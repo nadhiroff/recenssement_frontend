@@ -1,4 +1,4 @@
-import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFieldArray, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Bouton, Carte, Case, Champ, ChampDate, Choix, Muet, Squelette, T } from '@/components/ui';
@@ -31,7 +31,8 @@ export function EtapeType() {
 }
 
 export function EtapeIdentite() {
-  const { control, setValue, formState } = useFormContext<Brouillon>();
+  const { control, setValue } = useFormContext<Brouillon>();
+  const formState = useFormState({ control });
   const { fields, append, remove } = useFieldArray({ control, name: 'identite.autres_noms' });
   const [jour, mois, annee] = useWatch({ control, name: ['identite.jour_naissance', 'identite.mois_naissance', 'identite.annee_naissance'] });
   const date = { jour, mois, annee };
@@ -81,14 +82,14 @@ export function EtapeIdentite() {
         mois={date.mois}
         annee={date.annee}
         erreur={messageDe(formState.errors.identite?.jour_naissance ?? formState.errors.identite?.annee_naissance)}
-        onChange={(cle, v) => setValue(`identite.${cle}_naissance`, v, { shouldValidate: formState.isSubmitted })}
+        onChange={(cle, v) => setValue(`identite.${cle}_naissance`, v, { shouldDirty: true, shouldValidate: formState.isSubmitted })}
       />
       {date.jour === '' ? (
         <Controller
           control={control}
           name="identite.precision_naissance"
           render={({ field }) => (
-            <Choix label={t('inscription.precision')} valeur={field.value} onChange={(v) => { field.onChange(v); if (v === 'inconnue') setValue('identite.annee_naissance', ''); }} options={PRECISIONS.map((p) => ({ valeur: p, libelle: t(`inscription.precisions.${p}`) }))} />
+            <Choix label={t('inscription.precision')} valeur={field.value} onChange={(v) => { field.onChange(v); if (v === 'inconnue') setValue('identite.annee_naissance', '', { shouldDirty: true }); }} options={PRECISIONS.map((p) => ({ valeur: p, libelle: t(`inscription.precisions.${p}`) }))} />
           )}
         />
       ) : null}

@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
-import { Modal, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { ReduceMotion, SlideInLeft, SlideInRight, SlideOutLeft, SlideOutRight } from 'react-native-reanimated';
 
 import { Ecran } from '@/components/Ecran';
-import { BarreProgression, Bouton, Carte, Erreur, Muet, Squelette, T } from '@/components/ui';
+import { BarreProgression, Bouton, Carte, Dialogue, Erreur, Muet, Squelette, T } from '@/components/ui';
 import { t } from '@/i18n';
 import { api, ErreurApi } from '@/lib/api';
 import { useSession } from '@/lib/auth';
@@ -38,11 +38,19 @@ const glisser = (versAvant: boolean) => ({
   exiting: (versAvant ? SlideOutLeft : SlideOutRight).duration(DUREE.normale).reduceMotion(ReduceMotion.System),
 });
 
+const brouillonEntame = (b: Brouillon) =>
+  b.etape > 0 || b.type !== null || b.identite.prenoms.trim() !== '' || b.branche_id !== null;
+
 export function Parcours({ parcours }: { parcours: TypeParcours }) {
   const [initial, setInitial] = useState<Brouillon | null>(null);
+  const [reprise, setReprise] = useState(false);
+  const [version, setVersion] = useState(0);
 
   useEffect(() => {
-    lireBrouillon(parcours).then((b) => setInitial(b ?? brouillonVide()));
+    lireBrouillon(parcours).then((b) => {
+      setInitial(b ?? brouillonVide());
+      setReprise(!!b && brouillonEntame(b));
+    });
   }, [parcours]);
 
   if (!initial) {
@@ -53,7 +61,29 @@ export function Parcours({ parcours }: { parcours: TypeParcours }) {
       </Ecran>
     );
   }
-  return <Formulaire parcours={parcours} initial={initial} />;
+
+  const recommencer = () => {
+    const vide = { ...brouillonVide(), consentement: parcours === 'soi' && initial.consentement };
+    void ecrireBrouillon(parcours, vide);
+    setInitial(vide);
+    setVersion((v) => v + 1);
+    setReprise(false);
+  };
+
+  return (
+    <>
+      <Formulaire key={version} parcours={parcours} initial={initial} />
+      <Dialogue
+        visible={reprise}
+        titre={t('inscription.repriseTitre')}
+        texte={t('inscription.repriseTexte')}
+        oui={t('inscription.reprendre')}
+        non={t('inscription.recommencer')}
+        surOui={() => setReprise(false)}
+        surNon={recommencer}
+      />
+    </>
+  );
 }
 
 function Formulaire({ parcours, initial }: { parcours: TypeParcours; initial: Brouillon }) {
@@ -71,6 +101,7 @@ function Formulaire({ parcours, initial }: { parcours: TypeParcours; initial: Br
   const [occupe, setOccupe] = useState(false);
   const [enFile, setEnFile] = useState(false);
   const [resolution, setResolution] = useState<Resolution | null>(null);
+  const [abandon, setAbandon] = useState(false);
 
   const branches = useQuery({ queryKey: ['branches'], queryFn: () => api<{ id: number; nom: string; description: string | null }[]>('GET', '/branches'), staleTime: 3600_000 });
 
@@ -186,7 +217,14 @@ function Formulaire({ parcours, initial }: { parcours: TypeParcours; initial: Br
             </View>
           </View>
         }>
-        <Muet v="petit">{t('inscription.etape', { n: index + 1, total: etapes.length })}</Muet>
+        <View style={styles.haut}>
+          <Muet v="petit">{t('inscription.etape', { n: index + 1, total: etapes.length })}</Muet>
+          {parcours === 'tiers' ? (
+            <Pressable testID="annuler-inscription" accessibilityRole="button" hitSlop={12} onPress={() => setAbandon(true)}>
+              <T v="petit" gras couleur={c.primary}>{t('commun.annuler')}</T>
+            </Pressable>
+          ) : null}
+        </View>
         <T v="titre" couleur={c.primary}>
           {t(`inscription.etapes.${etape}`)}
         </T>
@@ -207,6 +245,20 @@ function Formulaire({ parcours, initial }: { parcours: TypeParcours; initial: Br
           </Carte>
         ) : null}
       </Ecran>
+      <Dialogue
+        visible={abandon}
+        danger
+        titre={t('inscription.abandonTitre')}
+        texte={t('inscription.abandonTexte')}
+        oui={t('inscription.abandonOui')}
+        non={t('inscription.abandonNon')}
+        surOui={async () => {
+          await effacerBrouillon(parcours);
+          setAbandon(false);
+          router.back();
+        }}
+        surNon={() => setAbandon(false)}
+      />
       <Modal visible={!!resolution} animationType="slide" onRequestClose={() => setResolution(null)}>
         <View style={[styles.flex, { backgroundColor: c.background }]}>
           <ScrollView contentContainerStyle={styles.modale}>
@@ -216,6 +268,7 @@ function Formulaire({ parcours, initial }: { parcours: TypeParcours; initial: Br
               <CarteCandidat key={i} candidat={cand} rang={i} cestMoi={resolution.cible === 'identite' && parcours === 'soi'} onChoisir={() => resoudre(cand)} />
             ))}
             <Bouton testID="nouvelle-fiche" variante="contour" titre={resolution?.cible === 'identite' && parcours === 'soi' ? t('inscription.pasMoi') : t('inscription.pasLui')} onPress={() => resoudre(null)} />
+            <Bouton variante="texte" titre={t('commun.annuler')} onPress={() => setResolution(null)} />
           </ScrollView>
         </View>
       </Modal>
@@ -255,6 +308,7 @@ async function validerEtape(
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  haut: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   pied: { flexDirection: 'row', gap: espace.s },
   etape: { gap: espace.m },
   modale: { padding: espace.m, paddingTop: espace.xl, gap: espace.m },

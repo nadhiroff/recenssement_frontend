@@ -63,6 +63,7 @@ type Session = {
 
 const Contexte = createContext<Session | null>(null);
 const DELAI_DECONNEXION_MS = 2500;
+const INTERVALLE_ALERTES_MS = 120_000;
 
 export function SessionFournie({ children }: { children: ReactNode }) {
   const client = useQueryClient();
@@ -82,11 +83,12 @@ export function SessionFournie({ children }: { children: ReactNode }) {
     if (enFermeture.current) return;
     enFermeture.current = true;
     // Sans réseau on n'attend pas : le jeton est de toute façon oublié sur ce téléphone.
+    const pushToken = await AsyncStorage.getItem('jeton_push');
     await Promise.race([
-      api('POST', '/auth/logout', {}).catch(() => {}),
+      api('POST', '/auth/logout', { push_token: pushToken ?? undefined }).catch(() => {}),
       new Promise((fini) => setTimeout(fini, DELAI_DECONNEXION_MS)),
     ]);
-    await AsyncStorage.multiRemove(['brouillon.soi', 'brouillon.tiers']);
+    await AsyncStorage.multiRemove(['brouillon.soi', 'brouillon.tiers', 'jeton_push']);
     await effacerFile();
     await sessionPerdue();
     enFermeture.current = false;
@@ -108,6 +110,8 @@ export function SessionFournie({ children }: { children: ReactNode }) {
     queryFn: () => api<Moi>('GET', '/me'),
     enabled: connecte,
     staleTime: 0,
+    // Nouvelles alertes vues sans push, seulement quand l'application est au premier plan.
+    refetchInterval: INTERVALLE_ALERTES_MS,
   });
 
   // Le formulaire doit rester utilisable hors ligne : la liste des branches est gardée dès la connexion.
