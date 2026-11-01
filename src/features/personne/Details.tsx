@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Badge, Carte, Muet, Squelette, T } from '@/components/ui';
@@ -97,13 +98,21 @@ function Proches({ titre, liste }: { titre: string; liste: ProcheFamille[] }) {
 
 export function FamilleFiche({ id }: { id: number }) {
   const famille = useQuery({ queryKey: ['famille', id], queryFn: () => api<FamillePersonne>('GET', `/personnes/${id}/famille`) });
+  const { refetch } = famille;
+  useFocusEffect(
+    useCallback(() => {
+      void refetch();
+    }, [refetch])
+  );
   if (famille.isPending) return <Squelette hauteur={96} />;
   const f = famille.data;
   const vide = !f || f.parents.length + f.conjoints.length + f.enfants.length === 0;
+  const enAttente = !!f && [...f.parents, ...f.conjoints, ...f.enfants].some((m) => m.statut && m.statut !== 'valide');
   return (
     <Carte>
       <T v="sousTitre">{t('personne.famille')}</T>
       {vide ? <Muet>{t('personne.aucun')}</Muet> : null}
+      {enAttente ? <Muet v="petit">{t('personne.enAttente')}</Muet> : null}
       {f ? (
         <>
           <Proches titre={t('personne.parents')} liste={f.parents} />

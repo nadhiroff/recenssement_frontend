@@ -376,7 +376,7 @@
     "parents": "Parents",
     "conjoints": "Conjoints",
     "enfants": "Enfants",
-    "aucun": "Aucun lien validé pour le moment.",
+    "aucun": "Aucun lien pour le moment.",
     "masque": "Le téléphone, l'email et la résidence restent visibles des seuls référents.",
     "famille": "Famille",
     "types": {
@@ -402,6 +402,7 @@
       "octobre",
       "novembre",
       "décembre"
-    ]
+    ],
+    "enAttente": "Un lien entre dans l'arbre quand le référent de la branche l'a validé."
   }
 }
