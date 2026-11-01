@@ -10,6 +10,7 @@ export const clair = {
   surPrimary: '#FFFFFF',
   success: '#2E8B57',
   warning: '#D98E04',
+  confirme: '#13868F',
   danger: '#B3261E',
   info: '#2F6FB0',
   private: '#6E5A8A',
@@ -29,6 +30,7 @@ export const sombre: Couleurs = {
   surPrimary: '#0E1311',
   success: '#2E8B57',
   warning: '#D98E04',
+  confirme: '#3FB8C0',
   danger: '#E5736B',
   info: '#6FA6DC',
   private: '#A893C4',
@@ -43,7 +45,7 @@ export type StatutLien = 'declare' | 'confirme' | 'valide' | 'en_examen' | 'priv
 export const couleurStatut = (c: Couleurs, s: StatutLien): string =>
   ({
     declare: c.warning,
-    confirme: c.warning,
+    confirme: c.confirme,
     valide: c.success,
     en_examen: c.info,
     prive: c.private,

@@ -1,5 +1,5 @@
 import fr from '@/i18n/fr.json';
-import { clair, contraste, sombre } from '@/theme/tokens';
+import { clair, contraste, couleurStatut, sombre } from '@/theme/tokens';
 
 describe('contrastes WCAG AA', () => {
   it.each([
@@ -17,6 +17,16 @@ describe('contrastes WCAG AA', () => {
     ]) {
       expect(contraste(texte, fond)).toBeGreaterThanOrEqual(4.5);
     }
+  });
+});
+
+describe('statuts', () => {
+  it.each([
+    ['clair', clair],
+    ['sombre', sombre],
+  ])('chaque statut a sa propre couleur, thème %s', (_, c) => {
+    const statuts = ['declare', 'confirme', 'valide', 'en_examen', 'prive', 'rejete'] as const;
+    expect(new Set(statuts.map((s) => couleurStatut(c, s))).size).toBe(statuts.length);
   });
 });
 
