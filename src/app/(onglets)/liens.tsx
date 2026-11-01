@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, Linking, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
@@ -62,9 +63,17 @@ export default function Liens() {
   const haut = useSafeAreaInsets().top;
   const { enAttente } = useReseau();
   const liens = useQuery({ queryKey: ['mes-liens'], queryFn: () => api<Lien[]>('GET', '/mes-liens') });
+  // Un statut peut changer à tout moment : la liste se relit à chaque retour sur l'onglet.
+  const { refetch } = liens;
+  useFocusEffect(
+    useCallback(() => {
+      void refetch();
+    }, [refetch])
+  );
   const rendu = useCallback(({ item, index }: { item: Lien; index: number }) => <CarteLien lien={item} rang={index} />, []);
   return (
     <FlatList
+      showsVerticalScrollIndicator={false}
       style={{ backgroundColor: c.background }}
       contentContainerStyle={[styles.liste, { paddingTop: haut + espace.m }]}
       data={liens.data ?? []}

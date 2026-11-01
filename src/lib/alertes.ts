@@ -120,6 +120,11 @@ export function useGestionAlertes() {
   }, [client, connecte, nonLues]);
 }
 
+/** Une alerte vue quitte aussi le centre de notifications du téléphone. */
+export function retirerAlertesDuTelephone() {
+  if (natif) void Notifications.dismissAllNotificationsAsync();
+}
+
 export function useEtatAlertes() {
   const [etat, setEtat] = useState<EtatAlertes>('indisponibles');
   const actualiser = useCallback(() => lireEtatAlertes().then(setEtat), []);

@@ -1,10 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { router, useNavigation, usePreventRemove } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, usePreventRemove } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm, useFormState } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { z } from 'zod';
 
 import { Ecran } from '@/components/Ecran';
@@ -16,8 +15,7 @@ import { api } from '@/lib/api';
 import { useSession } from '@/lib/auth';
 import { vibrerSucces } from '@/lib/retour';
 
-const LARGEUR_BORD = 32;
-const SEUIL_GLISSEMENT = 30;
+const SEUIL_GLISSEMENT = 24;
 
 const schema = z.object({ identite: identiteSchema });
 type Formulaire = z.infer<typeof schema>;
@@ -84,38 +82,26 @@ export default function FicheModifier() {
   });
 
   const { isDirty } = useFormState({ control: form.control });
-  const navigation = useNavigation();
   const [enregistre, setEnregistre] = useState(false);
   const [abandonne, setAbandonne] = useState(false);
-  const [sortie, setSortie] = useState<Parameters<typeof navigation.dispatch>[0] | null>(null);
+  const [question, setQuestion] = useState(false);
+  const proteger = isDirty && !enregistre && !abandonne;
 
-  // Glissement arrière, bouton retour ou Annuler : rien ne se perd sans confirmation.
-  usePreventRemove(isDirty && !enregistre && !abandonne, ({ data }) => setSortie(data.action));
+  // Autre sortie (touche retour Android) : même question.
+  usePreventRemove(proteger, () => setQuestion(true));
 
-  // Avec des changements, le retour natif d'iOS est coupé : le glissement depuis le bord est capté ici,
-  // pour que la question soit posée dans tous les cas.
-  useEffect(() => {
-    navigation.setOptions({ gestureEnabled: !isDirty });
-  }, [navigation, isDirty]);
+  const sortir = () => {
+    if (proteger) setQuestion(true);
+    else router.back();
+  };
 
-  const glissementRetour = Gesture.Pan()
-    .enabled(isDirty && !enregistre && !abandonne)
-    .runOnJS(true)
-    .hitSlop({ left: 0, width: LARGEUR_BORD })
-    .activeOffsetX(12)
-    .failOffsetY([-24, 24])
-    .onEnd((e) => {
-      if (e.translationX > SEUIL_GLISSEMENT) router.back();
-    });
+  // Le retour natif est coupé pour cet écran dans le layout : ce bord le remplace et passe par la question.
+  const departGlissement = useRef(0);
+  const glissementTraite = useRef(false);
 
   useEffect(() => {
-    if (enregistre) router.back();
-  }, [enregistre]);
-
-  // La protection doit être levée avant de relancer la sortie, sinon elle se bloque elle-même.
-  useEffect(() => {
-    if (abandonne && sortie) navigation.dispatch(sortie);
-  }, [abandonne, sortie, navigation]);
+    if (enregistre || abandonne) router.back();
+  }, [enregistre, abandonne]);
 
   const enregistrer = useMutation({
     mutationFn: ({ identite: d }: Formulaire) =>
@@ -140,8 +126,7 @@ export default function FicheModifier() {
 
   return (
     <FormProvider {...form}>
-      <GestureDetector gesture={glissementRetour}>
-        <View style={styles.flex} collapsable={false}>
+      <View style={styles.flex}>
           <Ecran
             pied={
               <>
@@ -153,27 +138,50 @@ export default function FicheModifier() {
                   chargement={enregistrer.isPending}
                   onPress={form.handleSubmit((d) => enregistrer.mutate(d))}
                 />
-                <Bouton variante="texte" titre={t('commun.annuler')} onPress={() => router.back()} />
+                <Bouton variante="texte" titre={t('commun.annuler')} onPress={sortir} />
               </>
             }>
             <T v="titre">{t('fiche.titreModifier')}</T>
             <EtapeIdentite />
             <EmailConnexion />
             <Dialogue
-              visible={sortie !== null && !abandonne}
+              visible={question}
               danger
               titre={t('fiche.abandonTitre')}
               texte={t('fiche.abandonTexte')}
               oui={t('fiche.abandonOui')}
               non={t('fiche.abandonNon')}
-              surOui={() => setAbandonne(true)}
-              surNon={() => setSortie(null)}
+              surOui={() => {
+                setQuestion(false);
+                setAbandonne(true);
+              }}
+              surNon={() => setQuestion(false)}
             />
           </Ecran>
-        </View>
-      </GestureDetector>
+        <View
+          testID="bord-retour"
+          style={styles.bord}
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          onStartShouldSetResponder={() => true}
+          onResponderTerminationRequest={() => false}
+          onResponderGrant={(e) => {
+            departGlissement.current = e.nativeEvent.pageX;
+            glissementTraite.current = false;
+          }}
+          onResponderMove={(e) => {
+            if (!glissementTraite.current && e.nativeEvent.pageX - departGlissement.current > SEUIL_GLISSEMENT) {
+              glissementTraite.current = true;
+              sortir();
+            }
+          }}
+        />
+      </View>
     </FormProvider>
   );
 }
 
-const styles = StyleSheet.create({ flex: { flex: 1 } });
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  bord: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 24 },
+});

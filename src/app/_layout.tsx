@@ -72,6 +72,7 @@ function Navigation() {
           <Stack.Screen name="index" options={{ gestureEnabled: false }} />
           <Stack.Screen name="(onglets)" options={{ gestureEnabled: false }} />
           <Stack.Screen name="inscription" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="fiche-modifier" options={{ gestureEnabled: false, fullScreenGestureEnabled: false }} />
         </Stack>
       </ThemeProvider>
     </ReseauFourni>

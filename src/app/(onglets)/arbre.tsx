@@ -48,7 +48,7 @@ export default function Arbre() {
         <T v="titre">{t('arbre.titre')}</T>
         <Champ label={t('arbre.rechercher')} value={saisie} onChangeText={setSaisie} autoCorrect={false} />
         {saisie.trim() !== '' && recherche.length >= 2 ? (
-          <ScrollView style={styles.resultats} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.pile}>
+          <ScrollView showsVerticalScrollIndicator={false} style={styles.resultats} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.pile}>
             {trouves.isPending ? <Squelette hauteur={48} /> : null}
             {trouves.data?.length === 0 ? <Muet>{t('commun.aucunResultat')}</Muet> : null}
             {trouves.data?.map((p) => (

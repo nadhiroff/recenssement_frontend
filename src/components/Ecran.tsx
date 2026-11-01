@@ -82,7 +82,7 @@ export function Ecran({ children, pied, sansDefilement }: { children: ReactNode;
         {sansDefilement ? (
           <View style={styles.contenuFixe}>{children}</View>
         ) : (
-          <ScrollView ref={defilement} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.contenu}>
+          <ScrollView ref={defilement} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.contenu}>
             <View ref={contenu} style={styles.limite}>
               {children}
             </View>

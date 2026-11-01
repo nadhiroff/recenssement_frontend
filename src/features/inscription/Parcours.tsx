@@ -261,7 +261,7 @@ function Formulaire({ parcours, initial }: { parcours: TypeParcours; initial: Br
       />
       <Modal visible={!!resolution} animationType="slide" onRequestClose={() => setResolution(null)}>
         <View style={[styles.flex, { backgroundColor: c.background }]}>
-          <ScrollView contentContainerStyle={styles.modale}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modale}>
             <T v="titre">{t('inscription.resoudreTitre')}</T>
             <Muet>{resolution?.cible === 'identite' && parcours === 'soi' ? t('inscription.resoudreSoi') : t('inscription.resoudreTexte')}</Muet>
             {resolution?.candidats.map((cand, i) => (

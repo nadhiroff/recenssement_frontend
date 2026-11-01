@@ -25,6 +25,7 @@ function File() {
   });
   return (
     <FlatList
+      showsVerticalScrollIndicator={false}
       data={file.data ?? []}
       keyExtractor={(l) => String(l.id)}
       contentContainerStyle={styles.liste}
@@ -108,6 +109,7 @@ function Doublons() {
   const liste = useQuery({ queryKey: ['doublons'], queryFn: () => api<Doublon[]>('GET', '/doublons?per_page=30') });
   return (
     <FlatList
+      showsVerticalScrollIndicator={false}
       data={liste.data ?? []}
       keyExtractor={(d) => String(d.id)}
       contentContainerStyle={styles.liste}
