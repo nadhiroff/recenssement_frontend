@@ -9,9 +9,10 @@ import { Bouton, Champ, Erreur, Muet, T } from '@/components/ui';
 import { INDICATIF_DEFAUT } from '@/config';
 import { t } from '@/i18n';
 import { api, ErreurApi } from '@/lib/api';
+import { normaliserTelephone, telephoneValide } from '@/lib/telephone';
 
 const schema = z.object({
-  telephone: z.string().transform((v) => v.replace(/[\s().-]/g, '')).pipe(z.string().regex(/^\+[1-9]\d{7,14}$/, 'erreurs.telephone')),
+  telephone: z.string().transform(normaliserTelephone).refine(telephoneValide, 'erreurs.telephone'),
   email: z.string().trim().pipe(z.union([z.literal(''), z.email('erreurs.email')])),
 });
 type Saisie = z.input<typeof schema>;

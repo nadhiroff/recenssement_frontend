@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   saisie: { minHeight: 52, borderWidth: 1, borderRadius: rayon.m, paddingHorizontal: espace.m },
   choix: { flexDirection: 'row', flexWrap: 'wrap', gap: espace.s },
   pastille: { minHeight: 44, paddingHorizontal: espace.m, borderWidth: 1, borderRadius: rayon.m, justifyContent: 'center' },
-  case: { flexDirection: 'row', gap: espace.s + 4, alignItems: 'flex-start', minHeight: 44 },
+  case: { flexDirection: 'row', gap: espace.s + 4, alignItems: 'center', minHeight: 44 },
   boite: { width: 28, height: 28, borderWidth: 2, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   flex: { flex: 1 },
   badge: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
