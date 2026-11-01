@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { Ecran } from '@/components/Ecran';
 import { Bouton, Carte, Erreur, Squelette, T } from '@/components/ui';
 import { t } from '@/i18n';
-import { api } from '@/lib/api';
+import { api, ErreurApi } from '@/lib/api';
 import { vibrerSucces } from '@/lib/retour';
 
 type Infos = { parent: string; enfant: string; role: string; deja_repondu: boolean; statut_attendu: boolean };
@@ -17,12 +17,15 @@ export default function Confirmation() {
     onSuccess: vibrerSucces,
   });
   const d = infos.data;
+  // Déjà répondu depuis une autre page : la réponse est enregistrée, ce n'est pas une erreur.
+  const dejaRepondu = repondre.error instanceof ErreurApi && repondre.error.code === 'deja_repondu';
+  const occupe = repondre.isPending;
   return (
     <Ecran>
       <T v="titre">{t('confirmation.titre')}</T>
       {infos.isPending ? <Squelette hauteur={140} /> : null}
-      <Erreur>{infos.error?.message ?? repondre.error?.message}</Erreur>
-      {repondre.isSuccess ? (
+      <Erreur>{infos.error?.message ?? (dejaRepondu ? undefined : repondre.error?.message)}</Erreur>
+      {repondre.isSuccess || dejaRepondu ? (
         <Carte>
           <T>{t('confirmation.merci')}</T>
         </Carte>
@@ -36,8 +39,8 @@ export default function Confirmation() {
             <T>{t('confirmation.question', { parent: d.parent, role: d.role, enfant: d.enfant })}</T>
           </Carte>
           <Bouton testID="oui" titre={t('confirmation.oui')} chargement={repondre.isPending} onPress={() => repondre.mutate('oui')} />
-          <Bouton variante="contour" titre={t('confirmation.non')} onPress={() => repondre.mutate('non')} />
-          <Bouton variante="texte" titre={t('confirmation.nsp')} onPress={() => repondre.mutate('ne_sait_pas')} />
+          <Bouton variante="contour" titre={t('confirmation.non')} desactive={occupe} onPress={() => repondre.mutate('non')} />
+          <Bouton variante="texte" titre={t('confirmation.nsp')} desactive={occupe} onPress={() => repondre.mutate('ne_sait_pas')} />
         </>
       ) : null}
     </Ecran>
