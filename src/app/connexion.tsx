@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Ecran } from '@/components/Ecran';
+import { Logo } from '@/components/Logo';
 import { Bouton, Champ, Erreur, Muet, T } from '@/components/ui';
 import { INDICATIF_DEFAUT } from '@/config';
 import { t } from '@/i18n';
@@ -45,6 +46,7 @@ export default function Connexion() {
 
   return (
     <Ecran pied={<Bouton testID="recevoir" titre={t('connexion.recevoir')} chargement={formState.isSubmitting} onPress={envoyer} />}>
+      <Logo taille={56} />
       <T v="titre">{creation ? t('connexion.titreCreation') : t('connexion.titre')}</T>
       <Muet>{creation ? t('connexion.texteCreation') : t('connexion.texte')}</Muet>
       <Controller

@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Logo } from '@/components/Logo';
 import { MotifPagne } from '@/components/MotifPagne';
 import { Bouton, Case, Muet, T } from '@/components/ui';
 import { t } from '@/i18n';
@@ -15,6 +16,7 @@ export default function Accueil() {
     <View style={[styles.racine, { backgroundColor: c.background, paddingTop: insets.top, paddingBottom: insets.bottom + espace.m }]}>
       <MotifPagne />
       <View style={styles.centre}>
+        <Logo />
         <T v="petit" gras couleur={c.primary}>
           {t('app.famille')}
         </T>

@@ -12,6 +12,7 @@ export default function Racine({ children }: PropsWithChildren) {
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="theme-color" content="#1F6B4F" />
         <link rel="manifest" href="manifest.json" />
+        <link rel="icon" type="image/svg+xml" href="logo.svg" />
         <ScrollViewStyleReset />
         <style dangerouslySetInnerHTML={{ __html: SANS_BARRES }} />
       </head>
