@@ -96,7 +96,7 @@ export function Ecran({ children, pied, sansDefilement }: { children: ReactNode;
             <Touche testID="fermer-clavier" gras texte={t('clavier.ok')} onPress={() => Keyboard.dismiss()} />
           </View>
         ) : pied ? (
-          <View style={[styles.pied, { paddingBottom: insets.bottom + espace.m, borderTopColor: c.bordure }]}>{pied}</View>
+          <View style={[styles.pied, { paddingBottom: Math.max(insets.bottom, espace.s), borderTopColor: c.bordure }]}>{pied}</View>
         ) : null}
       </View>
     </ClavierContexte.Provider>
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   contenu: { padding: espace.m, alignItems: 'center' },
   contenuFixe: { flex: 1, padding: espace.m },
   limite: { width: '100%', maxWidth: 560, gap: espace.m },
-  pied: { paddingHorizontal: espace.m, paddingTop: espace.m, borderTopWidth: StyleSheet.hairlineWidth, gap: espace.s },
+  pied: { paddingHorizontal: espace.m, paddingTop: espace.s, borderTopWidth: StyleSheet.hairlineWidth, gap: espace.s },
   barre: { flexDirection: 'row', alignItems: 'center', minHeight: 44, paddingHorizontal: espace.s, borderTopWidth: StyleSheet.hairlineWidth },
   touche: { minHeight: 44, paddingHorizontal: espace.m, justifyContent: 'center' },
 });

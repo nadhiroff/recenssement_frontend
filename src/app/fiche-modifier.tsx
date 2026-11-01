@@ -14,6 +14,7 @@ import { t } from '@/i18n';
 import { api } from '@/lib/api';
 import { useSession } from '@/lib/auth';
 import { vibrerSucces } from '@/lib/retour';
+import { espace } from '@/theme/tokens';
 
 const SEUIL_GLISSEMENT = 24;
 
@@ -82,17 +83,15 @@ export default function FicheModifier() {
   });
 
   const { isDirty } = useFormState({ control: form.control });
-  const [enregistre, setEnregistre] = useState(false);
-  const [abandonne, setAbandonne] = useState(false);
+  const [sortieAutorisee, setSortieAutorisee] = useState(false);
   const [question, setQuestion] = useState(false);
-  const proteger = isDirty && !enregistre && !abandonne;
 
-  // Autre sortie (touche retour Android) : même question.
-  usePreventRemove(proteger, () => setQuestion(true));
+  // Tout départ qui n'est pas un choix explicite pose la question : geste d'iOS, touche retour d'Android.
+  usePreventRemove(!sortieAutorisee, () => setQuestion(true));
 
-  const sortir = () => {
-    if (proteger) setQuestion(true);
-    else router.back();
+  const annuler = () => {
+    if (isDirty) setQuestion(true);
+    else setSortieAutorisee(true);
   };
 
   // Le retour natif est coupé pour cet écran dans le layout : ce bord le remplace et passe par la question.
@@ -100,8 +99,8 @@ export default function FicheModifier() {
   const glissementTraite = useRef(false);
 
   useEffect(() => {
-    if (enregistre || abandonne) router.back();
-  }, [enregistre, abandonne]);
+    if (sortieAutorisee) router.back();
+  }, [sortieAutorisee]);
 
   const enregistrer = useMutation({
     mutationFn: ({ identite: d }: Formulaire) =>
@@ -120,7 +119,7 @@ export default function FicheModifier() {
       vibrerSucces();
       client.invalidateQueries({ queryKey: ['personne'] });
       await recharger();
-      setEnregistre(true);
+      setSortieAutorisee(true);
     },
   });
 
@@ -131,14 +130,20 @@ export default function FicheModifier() {
             pied={
               <>
                 <Erreur>{enregistrer.error?.message}</Erreur>
-                <Bouton
-                  testID="enregistrer"
-                  titre={isDirty ? t('fiche.mettreAJour') : t('commun.enregistrer')}
-                  desactive={!isDirty}
-                  chargement={enregistrer.isPending}
-                  onPress={form.handleSubmit((d) => enregistrer.mutate(d))}
-                />
-                <Bouton variante="texte" titre={t('commun.annuler')} onPress={sortir} />
+                <View style={styles.pied}>
+                  <View style={styles.piedBouton}>
+                    <Bouton variante="contour" titre={t('commun.annuler')} onPress={annuler} />
+                  </View>
+                  <View style={styles.piedBouton}>
+                    <Bouton
+                      testID="enregistrer"
+                      titre={isDirty ? t('fiche.mettreAJour') : t('commun.enregistrer')}
+                      desactive={!isDirty}
+                      chargement={enregistrer.isPending}
+                      onPress={form.handleSubmit((d) => enregistrer.mutate(d))}
+                    />
+                  </View>
+                </View>
               </>
             }>
             <T v="titre">{t('fiche.titreModifier')}</T>
@@ -153,13 +158,15 @@ export default function FicheModifier() {
               non={t('fiche.abandonNon')}
               surOui={() => {
                 setQuestion(false);
-                setAbandonne(true);
+                setSortieAutorisee(true);
               }}
               surNon={() => setQuestion(false)}
             />
           </Ecran>
         <View
           testID="bord-retour"
+          // Sans cela, iOS supprime cette vue vide de l'affichage et elle ne reçoit aucun toucher.
+          collapsable={false}
           style={styles.bord}
           accessibilityElementsHidden
           importantForAccessibility="no"
@@ -172,7 +179,7 @@ export default function FicheModifier() {
           onResponderMove={(e) => {
             if (!glissementTraite.current && e.nativeEvent.pageX - departGlissement.current > SEUIL_GLISSEMENT) {
               glissementTraite.current = true;
-              sortir();
+              setQuestion(true);
             }
           }}
         />
@@ -183,5 +190,7 @@ export default function FicheModifier() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  bord: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 24 },
+  bord: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 28, backgroundColor: 'rgba(0,0,0,0.001)' },
+  pied: { flexDirection: 'row', gap: espace.s },
+  piedBouton: { flex: 1 },
 });

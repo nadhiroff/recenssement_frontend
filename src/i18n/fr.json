@@ -205,10 +205,10 @@
     "emailChange": "Email de connexion mis à jour.",
     "numeroAide": "Pour changer de numéro, adressez-vous au référent de votre branche.",
     "mettreAJour": "Mettre à jour",
-    "abandonTitre": "Annuler les modifications ?",
-    "abandonTexte": "Ce que vous venez de changer ne sera pas enregistré.",
-    "abandonOui": "Oui, annuler les modifications",
-    "abandonNon": "Non, continuer à modifier"
+    "abandonTitre": "Annuler ou continuer ?",
+    "abandonTexte": "Voulez-vous quitter cette page ? Ce qui n'est pas enregistré sera perdu.",
+    "abandonOui": "Annuler et quitter",
+    "abandonNon": "Continuer"
   },
   "statuts": {
     "declare": "Déclaré",
