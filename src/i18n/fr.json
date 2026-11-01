@@ -403,6 +403,10 @@
       "novembre",
       "décembre"
     ],
-    "enAttente": "Un lien entre dans l'arbre quand le référent de la branche l'a validé."
+    "enAttente": "Un lien entre dans l'arbre quand le référent de la branche l'a validé.",
+    "ordreEpouses": "Ordre des épouses",
+    "ordreAide": "À vérifier avec les aînés. L'arbre suivra cet ordre.",
+    "monter": "Monter",
+    "descendre": "Descendre"
   }
 }

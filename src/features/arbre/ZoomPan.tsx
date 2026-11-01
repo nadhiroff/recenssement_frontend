@@ -55,6 +55,11 @@ export function ZoomPan({ children }: { children: ReactNode }) {
 
   return (
     <View style={styles.cadre}>
+      <GestureDetector gesture={Gesture.Simultaneous(pincer, glisser)}>
+        <View style={styles.zone}>
+          <Animated.View style={[styles.origine, style]}>{children}</Animated.View>
+        </View>
+      </GestureDetector>
       <View style={styles.commandes}>
         {[
           { l: '+', a11y: t('arbre.agrandir'), f: () => changerZoom(1.25) },
@@ -66,11 +71,6 @@ export function ZoomPan({ children }: { children: ReactNode }) {
           </Pressable>
         ))}
       </View>
-      <GestureDetector gesture={Gesture.Simultaneous(pincer, glisser)}>
-        <View style={styles.zone}>
-          <Animated.View style={[styles.origine, style]}>{children}</Animated.View>
-        </View>
-      </GestureDetector>
     </View>
   );
 }
@@ -79,6 +79,6 @@ const styles = StyleSheet.create({
   cadre: { flex: 1, overflow: 'hidden' },
   zone: { flex: 1, overflow: 'hidden' },
   origine: { alignSelf: 'flex-start', padding: espace.m, transformOrigin: 'top left' },
-  commandes: { flexDirection: 'row', justifyContent: 'flex-end', gap: espace.s, paddingHorizontal: espace.m, paddingTop: espace.s },
+  commandes: { position: 'absolute', right: espace.m, bottom: espace.m, gap: espace.s },
   commande: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
 });
